@@ -170,14 +170,44 @@ export async function POST(request: NextRequest) {
 
       let parsed: any = null;
       try {
+        // Try direct JSON parse first
         parsed = JSON.parse(text);
       } catch (e) {
-        // If Ollama returned raw text (not strict JSON), try to extract JSON substring
+        // Handle streaming-style responses produced by some local LLM servers (many small JSON objects)
         try {
-          const jsonMatch = text.match(/\{[\s\S]*\}/m);
-          parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: text };
-        } catch (e2) {
-          parsed = { raw: text };
+          // Extract all "response" string fragments and JSON-decode them to unescape characters
+          const respRegex = /"response":("[\s\S]*?")/gs;
+          const pieces: string[] = [];
+          for (const m of text.matchAll(respRegex)) {
+            if (m && m[1]) {
+              try {
+                // JSON.parse the quoted string to decode escapes
+                pieces.push(JSON.parse(m[1]));
+              } catch (_err) {
+                // fallback: strip surrounding quotes
+                pieces.push(m[1].slice(1, -1));
+              }
+            }
+          }
+
+          const combined = pieces.join('');
+
+          // Try parsing the combined generation as JSON (LLM may stream a JSON object)
+          try {
+            parsed = JSON.parse(combined);
+          } catch (e2) {
+            // If combined text contains an embedded JSON substring, try to extract that
+            const jsonMatch = combined.match(/\{[\s\S]*\}/m) || text.match(/\{[\s\S]*\}/m);
+            parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: combined || text };
+          }
+        } catch (e3) {
+          // Final fallback: try to extract any JSON substring from the original text
+          try {
+            const jsonMatch = text.match(/\{[\s\S]*\}/m);
+            parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: text };
+          } catch (e4) {
+            parsed = { raw: text };
+          }
         }
       }
 

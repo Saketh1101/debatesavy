@@ -9,11 +9,11 @@ export async function GET(
     return withAuth(request, async (req, userId) => {
         try {
             const { debateId } = await params;
-            store.ensureDebateExists(debateId);
-            const debate = store.getDebate(debateId);
-            if (!debate) {
+            const exists = store.ensureDebateExists(debateId);
+            if (!exists) {
                 return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
             }
+            const debate = store.getDebate(debateId);
             return NextResponse.json(debate);
         } catch (error) {
             console.error('Get debate error:', error);

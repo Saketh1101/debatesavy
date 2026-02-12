@@ -47,9 +47,10 @@ export function addArgumentToDebate(debateId: string, arg: any) {
 }
 
 export function ensureDebateExists(id: string) {
-  if (!debates.has(id)) {
-    createDebate({ id, title: 'Demo Debate', topic: 'Demo Topic', userId: 'user_demo' });
-  }
+  // Previously created a demo debate when a debate was missing. That caused
+  // the UI to show 'Demo Debate' for arbitrary IDs. We no longer auto-create
+  // debates on fetch; return a boolean to indicate existence.
+  return debates.has(id);
 }
 
 export default {
