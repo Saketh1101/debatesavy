@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String
+  password  String?
+  image     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  rating    Int        @default(1200)
+  ratingHistory RatingHistory[]
+
+  debates   Debate[]
+  arguments Argument[]
+  sessions  Session[]
+
+  @@index([email])
+}
+
+model Session {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String     @unique
+  expiresAt DateTime
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Debate {
+  id          String     @id @default(cuid())
+  title       String
+  topic       String
+  status      String     @default("pending") // pending, active, completed
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  startedAt   DateTime?
+  endedAt     DateTime?
+
+  participants User[]
+  arguments    Argument[]
+  analysis     DebateAnalysis?
+
+  roomCode    String?    @unique
+  isPublic    Boolean    @default(false)
+  maxParticipants Int    @default(2)
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Argument {
+  id        String     @id @default(cuid())
+  debateId  String
+  debate    Debate     @relation(fields: [debateId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content   String
+  timestamp DateTime   @default(now())
+  analysis  ArgumentAnalysis?
+
+  @@index([debateId])
+  @@index([userId])
+  @@index([timestamp])
+}
+
+model ArgumentAnalysis {
+  id          String     @id @default(cuid())
+  argumentId  String     @unique
+  argument    Argument   @relation(fields: [argumentId], references: [id], onDelete: Cascade)
+
+  argumentStrength    Float  @default(0)
+  relevance          Float  @default(0)
+  evidenceUsage      Float  @default(0)
+  logicalConsistency Float  @default(0)
+  engagement         Float  @default(0)
+  overallScore       Float  @default(0)
+
+  feedback   String?
+  createdAt  DateTime   @default(now())
+}
+
+model DebateAnalysis {
+  id          String     @id @default(cuid())
+  debateId    String     @unique
+  debate      Debate     @relation(fields: [debateId], references: [id], onDelete: Cascade)
+
+  participantScores Json  // { userId: score }
+  winner          String? // No winner, just scores
+  summary         String?
+  insights        String?
+
+  createdAt   DateTime   @default(now())
+}
+
+model RatingHistory {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  previousRating  Int
+  newRating       Int
+  change          Int
+  reason          String  // debate_win, debate_loss, debate_performance
+  debateId        String?
+
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Leaderboard {
+  id        String     @id @default(cuid())
+  userId    String
+  rank      Int        @unique
+  rating    Int
+  debatesParticipated Int @default(0)
+  winRate   Float      @default(0)
+  updatedAt DateTime   @updatedAt
+
+  @@index([rating])
+  @@index([rank])
+}

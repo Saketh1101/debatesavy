@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DebateIQ - AI-Powered Debate Analysis Platform
+
+A modern SaaS web application that leverages AI to analyze and evaluate debate arguments, helping users improve their critical thinking and argumentation skills.
+
+## Features
+
+- **User Authentication**: Secure email/password registration and login with JWT tokens
+- **Debate Rooms**: Create or join debate rooms for structured discussions
+- **AI Analysis**: Real-time argument analysis covering:
+  - Argument strength
+  - Relevance
+  - Evidence usage
+  - Logical consistency
+  - Engagement with opposing points
+- **ELO Rating System**: Fair skill-based rating system
+- **Live Debate Interface**: Split-layout for real-time participation
+- **Post-Debate Analytics**: Detailed feedback and metrics
+- **Leaderboard**: Global ranking system
+- **Responsive Design**: Mobile-friendly
+
+## Tech Stack
+
+- Next.js 16, React 19, TypeScript, Tailwind CSS
+- PostgreSQL with Prisma ORM
+- JWT Authentication with bcryptjs
+- OpenAI API ready
+- Zustand for state management
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Installation
+
+1. Install dependencies: `npm install`
+2. Set up `.env.local` with database URL and API keys
+3. Run migrations: `npx prisma migrate dev --name init`
+4. Start dev server: `npm run dev`
+
+Open [http://localhost:3000](http://localhost:3000) to see the result.
+
+## Project Structure
+
+```
+app/
+├── api/ (authentication, debates, arguments)
+├── components/ (Header, Navigation, Button)
+├── auth/ (login, register pages)
+├── dashboard/
+├── leaderboard/
+├── profile/
+└── debates/
+
+lib/
+├── auth/ (JWT, middleware)
+├── utils/
+└── prisma.ts
+
+prisma/
+└── schema.prisma
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Endpoints
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `POST /api/auth/register` - Register
+- `POST /api/auth/login` - Login
+- `GET/POST /api/debates` - Manage debates
+- `POST /api/arguments` - Submit arguments
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**DebateIQ** - Where Logic Meets Learning

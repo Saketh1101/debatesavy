@@ -1,0 +1,159 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Header from '@/app/components/Header';
+import Navigation from '@/app/components/Navigation';
+import Button from '@/app/components/Button';
+
+interface Debate {
+    id: string;
+    title: string;
+    topic: string;
+    status: string;
+    createdAt: string;
+    participants: Array<{ name: string }>;
+}
+
+export default function DashboardPage() {
+    const router = useRouter();
+    const [debates, setDebates] = useState<Debate[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<{ name: string; rating: number } | null>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/auth/login');
+            return;
+        }
+
+        const fetchDebates = async () => {
+            try {
+                const response = await fetch('/api/debates', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setDebates(data);
+                    setUser({ name: 'Debater', rating: 1200 });
+                } else {
+                    router.push('/auth/login');
+                }
+            } catch (error) {
+                console.error('Failed to fetch debates:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDebates();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <>
+                <Header>
+                    <Navigation />
+                </Header>
+                <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center">
+                    <p className="text-slate-400">Loading...</p>
+                </div>
+            </>
+        );
+    }
+
+    return (
+        <>
+            <Header>
+                <Navigation />
+            </Header>
+
+            <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    {/* Welcome Section */}
+                    <div className="mb-12">
+                        <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}! 👋</h1>
+                        <p className="text-slate-400">Here's your debate activity and performance.</p>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                            <p className="text-slate-400 text-sm mb-2">Current Rating</p>
+                            <p className="text-4xl font-bold text-blue-400">{user?.rating}</p>
+                        </div>
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                            <p className="text-slate-400 text-sm mb-2">Total Debates</p>
+                            <p className="text-4xl font-bold">{debates.length}</p>
+                        </div>
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                            <p className="text-slate-400 text-sm mb-2">Active Debates</p>
+                            <p className="text-4xl font-bold">{debates.filter(d => d.status === 'active').length}</p>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="mb-12">
+                        <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Link href="/debates/create">
+                                <Button variant="primary" size="lg" className="w-full">
+                                    Create New Debate
+                                </Button>
+                            </Link>
+                            <Link href="/debates/join">
+                                <Button variant="secondary" size="lg" className="w-full">
+                                    Join Debate
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Debates List */}
+                    <div>
+                        <h2 className="text-2xl font-bold mb-6">Recent Debates</h2>
+                        {debates.length === 0 ? (
+                            <div className="bg-slate-800 rounded-xl p-12 text-center border border-slate-700">
+                                <p className="text-slate-400 mb-4">No debates yet. Start by creating one!</p>
+                                <Link href="/debates/create">
+                                    <Button variant="primary">Create Debate</Button>
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {debates.map((debate) => (
+                                    <Link key={debate.id} href={`/debates/${debate.id}`}>
+                                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500 transition cursor-pointer">
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <h3 className="text-lg font-semibold mb-2">{debate.title}</h3>
+                                                    <p className="text-slate-400 mb-2">{debate.topic}</p>
+                                                    <div className="flex gap-2">
+                                                        <span className="text-xs bg-slate-700 px-2 py-1 rounded">
+                                                            {debate.status}
+                                                        </span>
+                                                        <span className="text-xs bg-slate-700 px-2 py-1 rounded">
+                                                            {debate.participants.length} participants
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <span className="text-slate-500 text-sm">
+                                                    {new Date(debate.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
