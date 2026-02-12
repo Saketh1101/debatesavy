@@ -60,25 +60,25 @@ export default function FriendlyDebatePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950">
+        <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950">
             <Header />
 
-            <main className="max-w-4xl mx-auto px-4 py-12">
+            <main className="max-w-6xl mx-auto px-4 py-12">
                 {/* Header */}
-                <div className="mb-8">
-                    <Link href="/modes" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
-                        Back to Modes
+                <div className="mb-12">
+                    <Link href="/modes" className="text-blue-400 hover:text-blue-300 mb-4 inline-block flex items-center gap-2">
+                        <span>←</span> Back to Modes
                     </Link>
-                    <h1 className="text-4xl font-bold text-white mb-2">Friendly Debate</h1>
-                    <p className="text-gray-400">Debate with friends or colleagues on topics you care about</p>
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent mb-2">Friendly Debate</h1>
+                    <p className="text-slate-400 text-lg">Engage in thoughtful discussions with friends and colleagues</p>
                 </div>
 
                 {/* Main Form */}
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid lg:grid-cols-3 gap-8">
                     {/* Form */}
-                    <div className="md:col-span-2">
-                        <div className="bg-slate-900 rounded-lg border border-slate-800 p-8">
-                            <h2 className="text-2xl font-bold text-white mb-6">Create a New Debate</h2>
+                    <div className="lg:col-span-2">
+                        <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700/50 rounded-xl p-8">
+                            <h2 className="text-2xl font-bold text-white mb-8">Create a Debate</h2>
 
                             {/* Debate Title */}
                             <div className="mb-6">
@@ -87,8 +87,8 @@ export default function FriendlyDebatePage() {
                                     type="text"
                                     value={debateTitle}
                                     onChange={(e) => setDebateTitle(e.target.value)}
-                                    placeholder="e.g., AI Impact on Employment"
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                                    placeholder="e.g., The Future of AI"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition"
                                 />
                             </div>
 

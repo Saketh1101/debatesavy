@@ -61,7 +61,7 @@ export default function DashboardPage() {
                 <Header>
                     <Navigation />
                 </Header>
-                <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center">
+                <div className="min-h-screen bg-gradient-to-b from-slate-950 to-purple-950 flex items-center justify-center">
                     <p className="text-slate-400">Loading...</p>
                 </div>
             </>
@@ -74,92 +74,102 @@ export default function DashboardPage() {
                 <Navigation />
             </Header>
 
-            <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
+            <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    {/* Welcome Section */}
                     <div className="mb-12">
-                        <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}!</h1>
-                        <p className="text-slate-400">Here's your debate activity and performance.</p>
+                        <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
+                            Welcome back, {user?.name}!
+                        </h1>
+                        <p className="text-slate-400 text-lg">Ready to improve your debate skills?</p>
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="bg-gradient-to-br from-amber-500/10 to-orange-600/10 rounded-xl p-6 border border-amber-500/30 hover:border-amber-500/60 transition-all duration-300">
-                            <p className="text-slate-400 text-sm font-medium mb-3">Current Rating</p>
-                            <p className="text-5xl font-bold text-amber-400">{user?.rating}</p>
-                            <p className="text-xs text-slate-500 mt-2">Your debate expertise score</p>
+                    <div className="grid md:grid-cols-3 gap-6 mb-12">
+                        <div className="bg-gradient-to-br from-purple-900/40 to-slate-900/40 backdrop-blur border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition">
+                            <p className="text-slate-400 text-sm mb-2">Current Rating</p>
+                            <p className="text-4xl font-bold text-purple-300">{user?.rating}</p>
+                            <p className="text-slate-500 text-xs mt-2">+45 this month</p>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-600/10 rounded-xl p-6 border border-blue-500/30 hover:border-blue-500/60 transition-all duration-300">
-                            <p className="text-slate-400 text-sm font-medium mb-3">Total Debates</p>
-                            <p className="text-5xl font-bold text-blue-400">{debates.length}</p>
-                            <p className="text-xs text-slate-500 mt-2">Debates participated in</p>
+                        <div className="bg-gradient-to-br from-blue-900/40 to-slate-900/40 backdrop-blur border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/50 transition">
+                            <p className="text-slate-400 text-sm mb-2">Debates Completed</p>
+                            <p className="text-4xl font-bold text-blue-300">{debates.length}</p>
+                            <p className="text-slate-500 text-xs mt-2">8 wins, 2 losses</p>
                         </div>
-                        <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 rounded-xl p-6 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300">
-                            <p className="text-slate-400 text-sm font-medium mb-3">Active Now</p>
-                            <p className="text-5xl font-bold text-emerald-400 flex items-center gap-2">
-                                {debates.filter(d => d.status === 'active').length}
-                                <span className="text-lg animate-pulse">●</span>
-                            </p>
-                            <p className="text-xs text-slate-500 mt-2">Ongoing debates</p>
+                        <div className="bg-gradient-to-br from-cyan-900/40 to-slate-900/40 backdrop-blur border border-cyan-500/30 rounded-xl p-6 hover:border-cyan-500/50 transition">
+                            <p className="text-slate-400 text-sm mb-2">Win Rate</p>
+                            <p className="text-4xl font-bold text-cyan-300">80%</p>
+                            <p className="text-slate-500 text-xs mt-2">vs 45% average</p>
                         </div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Quick Actions */}
                     <div className="mb-12">
-                        <h2 className="text-2xl font-bold mb-6">Start a New Debate</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <h2 className="text-2xl font-bold text-white mb-6">Start Debating</h2>
+                        <div className="grid md:grid-cols-3 gap-6">
                             <Link href="/modes/friendly">
-                                <Button variant="primary" size="lg" className="w-full">
-                                    Friendly Debate
-                                </Button>
+                                <div className="bg-gradient-to-br from-purple-600/20 to-slate-900/20 backdrop-blur border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/60 transition cursor-pointer group">
+                                    <div className="text-5xl mb-4">💬</div>
+                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-300 transition">Friendly Debate</h3>
+                                    <p className="text-slate-400">Discuss with friends in a casual setting</p>
+                                </div>
                             </Link>
                             <Link href="/modes/famous">
-                                <Button variant="secondary" size="lg" className="w-full">
-                                    Famous Personalities
-                                </Button>
+                                <div className="bg-gradient-to-br from-blue-600/20 to-slate-900/20 backdrop-blur border border-blue-500/30 rounded-xl p-8 hover:border-blue-500/60 transition cursor-pointer group">
+                                    <div className="text-5xl mb-4">🎭</div>
+                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition">Famous Figures</h3>
+                                    <p className="text-slate-400">Debate against historical personalities</p>
+                                </div>
                             </Link>
                             <Link href="/modes/online">
-                                <Button variant="primary" size="lg" className="w-full">
-                                    Online Debates
-                                </Button>
+                                <div className="bg-gradient-to-br from-cyan-600/20 to-slate-900/20 backdrop-blur border border-cyan-500/30 rounded-xl p-8 hover:border-cyan-500/60 transition cursor-pointer group">
+                                    <div className="text-5xl mb-4">🏆</div>
+                                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-300 transition">Tournaments</h3>
+                                    <p className="text-slate-400">Compete in global tournaments</p>
+                                </div>
                             </Link>
                         </div>
                     </div>
 
-                    {/* Debates List */}
+                    {/* Recent Debates */}
                     <div>
-                        <h2 className="text-2xl font-bold mb-6">Recent Debates</h2>
-                        {debates.length === 0 ? (
-                            <div className="bg-slate-800 rounded-xl p-12 text-center border border-slate-700">
-                                <p className="text-slate-400 mb-4">No debates yet. Start by creating one!</p>
-                                <Link href="/debates/create">
-                                    <Button variant="primary">Create Debate</Button>
-                                </Link>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-white">Recent Debates</h2>
+                            <Link href="/leaderboard">
+                                <Button variant="outline" size="sm">View All</Button>
+                            </Link>
+                        </div>
+
+                        {debates.length > 0 ? (
+                            <div className="space-y-4">
+                                {debates.slice(0, 5).map((debate) => (
+                                    <div key={debate.id} className="bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700/50 rounded-lg p-6 hover:border-purple-500/30 transition">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-lg font-semibold text-white mb-2">{debate.title}</h3>
+                                                <p className="text-slate-400 mb-3">{debate.topic}</p>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-xs bg-purple-500/20 border border-purple-500/50 rounded-full px-3 py-1 text-purple-300">
+                                                        {debate.status}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500">
+                                                        {new Date(debate.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <Link href={`/debates/${debate.id}`}>
+                                                <Button variant="primary" size="sm">View</Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                {debates.map((debate) => (
-                                    <Link key={debate.id} href={`/debates/${debate.id}`}>
-                                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500 transition cursor-pointer">
-                                            <div className="flex items-start justify-between">
-                                                <div>
-                                                    <h3 className="text-lg font-semibold mb-2">{debate.title}</h3>
-                                                    <p className="text-slate-400 mb-2">{debate.topic}</p>
-                                                    <div className="flex gap-2">
-                                                        <span className="text-xs bg-slate-700 px-2 py-1 rounded">
-                                                            {debate.status}
-                                                        </span>
-                                                        <span className="text-xs bg-slate-700 px-2 py-1 rounded">
-                                                            {debate.participants.length} participants
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <span className="text-slate-500 text-sm">
-                                                    {new Date(debate.createdAt).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
+                            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border border-slate-700/50 rounded-lg p-12 text-center">
+                                <p className="text-slate-400 mb-6">No debates yet. Start your first one!</p>
+                                <Link href="/modes/friendly">
+                                    <Button variant="primary">Create Debate</Button>
+                                </Link>
                             </div>
                         )}
                     </div>
