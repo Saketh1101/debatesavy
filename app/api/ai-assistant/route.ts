@@ -1,34 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const mockResponses: { [key: string]: string[] } = {
-    'logical_fallacy': [
-        '💡 This looks like a potential logical fallacy. Try rephrasing your argument to be more logically sound.',
-        '🤔 Watch out for circular reasoning. Can you support this with independent evidence?',
-    ],
-    'strengthen_argument': [
-        '✨ Great start! Try adding specific statistics or expert quotes to strengthen this.',
-        '📊 This argument could be more convincing with a real-world example.',
-        '🎯 Consider addressing the counterargument to make your position more robust.',
-    ],
-    'general': [
-        '💬 Interesting point! Have you thought about the broader implications?',
-        '⚡ That\'s persuasive! The connection is clear and logical.',
-        '🌟 You\'re making progress! Keep building on this momentum.',
-        '📈 Your debate skills are improving. Focus on adding more evidence.',
-    ],
-    'feedback': [
-        '✅ Your argument was well-structured and persuasive.',
-        '📝 Consider organizing your points more clearly.',
-        '🎤 Your tone was engaging and respectful.',
-        '🏆 Strong performance overall!',
-    ]
-};
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || '');
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const { message, context = 'dashboard', debateId } = await req.json();
+            const { message, context = 'dashboard', debateId, personalityName, debateTopic } = await req.json();
 
             if (!message) {
                 return NextResponse.json(
@@ -37,41 +16,50 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            // Determine response type based on message content
-            let responseArray = mockResponses['general'];
-            const lowerMessage = message.toLowerCase();
-
-            if (lowerMessage.includes('fallacy') || lowerMessage.includes('logical') || lowerMessage.includes('wrong')) {
-                responseArray = mockResponses['logical_fallacy'];
-            } else if (lowerMessage.includes('strengthen') || lowerMessage.includes('improve') || lowerMessage.includes('better')) {
-                responseArray = mockResponses['strengthen_argument'];
-            } else if (lowerMessage.includes('feedback') || lowerMessage.includes('how') || lowerMessage.includes('was')) {
-                responseArray = mockResponses['feedback'];
+            if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+                return NextResponse.json(
+                    { error: 'Google Generative AI API key not configured' },
+                    { status: 500 }
+                );
             }
 
-            // Select random response
-            const response = responseArray[Math.floor(Math.random() * responseArray.length)];
+            // Build system prompt based on debate context
+            let systemPrompt = 'You are an AI debate assistant providing concise, constructive feedback on debate arguments.';
 
-            // Save message to mock database
-            const assistantMessage = {
-                id: 'msg_' + Math.random().toString(36).substr(2, 9),
-                userId,
-                message,
-                response,
-                context,
-                debateId: debateId || null,
-                createdAt: new Date(),
-            };
+            if (personalityName) {
+                systemPrompt = `You are an AI debate assistant helping a user debate against ${personalityName}. 
+Provide concise, constructive feedback on their argument (2-3 sentences). 
+Focus on: logical soundness, evidence quality, potential counterarguments, and persuasiveness.
+Be encouraging but also critically evaluate their position.`;
+            } else {
+                systemPrompt = `You are an AI debate assistant. 
+Provide concise, constructive feedback on the user's argument (2-3 sentences).
+Focus on: logical soundness, evidence quality, potential counterarguments, and persuasiveness.
+Be encouraging but also critically evaluate their position.`;
+            }
+
+            if (debateTopic) {
+                systemPrompt += ` The debate topic is: "${debateTopic}"`;
+            }
+
+            // Call Google Generative AI API
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const fullPrompt = `${systemPrompt}\n\nUser message: ${message}`;
+            const result = await model.generateContent(fullPrompt);
+            const assistantMessage = result.response.text() || 'I could not generate a response. Please try again.';
 
             return NextResponse.json({
                 success: true,
-                response,
-                messageId: assistantMessage.id,
+                response: assistantMessage,
+                messageId: 'msg_' + Math.random().toString(36).substr(2, 9),
             });
         } catch (error) {
             console.error('AI Assistant error:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            console.error('Detailed error:', errorMsg);
+
             return NextResponse.json(
-                { error: 'Failed to process message' },
+                { error: `AI API Error: ${errorMsg}` },
                 { status: 500 }
             );
         }

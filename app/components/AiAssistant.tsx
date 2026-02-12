@@ -37,25 +37,38 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setIsLoading(true);
 
-        // Simulate AI response
-        setTimeout(() => {
-            const responses = [
-                'That\'s a great point! Consider adding specific evidence to strengthen your argument.',
-                'Interesting perspective! Have you considered the counterargument about...?',
-                'Excellent delivery! Your argument structure is getting stronger.',
-                'Your argument covers the main points well. Try adding a real-world example next time.',
-                'You\'re on the right track! This logic flows well with your previous statement.',
-                'Strong evidence! Now address the potential counterargument to make it even more convincing.',
-                `${personalityName ? `${personalityName} might argue...` : 'Your opponent might argue...'} Have you thought about...?`,
-                'That\'s persuasive! The connection between your points is clear and logical.',
-                'Good attempt! Let me suggest a stronger way to phrase that argument...',
-                'Great argumentation! This shows clear critical thinking.'
-            ];
+        try {
+            const response = await fetch('/api/ai-assistant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    debateId,
+                    debateMode,
+                    personalityName,
+                    debateTopic: debateMode === 'friendly' ? 'Debate' : undefined,
+                }),
+            });
 
-            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-            setMessages(prev => [...prev, { role: 'assistant', content: randomResponse }]);
+            if (!response.ok) {
+                throw new Error('Failed to get AI response');
+            }
+
+            const data = await response.json();
+            const aiResponse = data.response || 'I could not generate a response. Please try again.';
+
+            setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+        } catch (error) {
+            console.error('Error:', error);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: 'Sorry, I encountered an error. Please check that your Google Gemini API key is configured and try again.'
+            }]);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
