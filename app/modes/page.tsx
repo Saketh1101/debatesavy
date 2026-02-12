@@ -10,7 +10,7 @@ export default function ModesPage() {
             title: 'Friendly Debate',
             description: 'Debate with friends or colleagues. Choose the number of participants and debate topic.',
             badge: 'Social',
-            color: 'from-blue-500 to-blue-600',
+            color: 'from-slate-700 to-slate-800',
             href: '/modes/friendly',
             features: [
                 'Select number of participants',
@@ -24,7 +24,7 @@ export default function ModesPage() {
             title: 'Famous Personalities',
             description: 'Debate against AI representations of famous personalities. Experience their unique argument styles.',
             badge: 'Premium',
-            color: 'from-purple-500 to-purple-600',
+            color: 'from-slate-700 to-slate-800',
             href: '/modes/famous',
             features: [
                 'Debate legendary figures',
@@ -38,7 +38,7 @@ export default function ModesPage() {
             title: 'Online Debates',
             description: 'Join live debates with random participants. Find opponents based on your interests and skill level.',
             badge: 'Competitive',
-            color: 'from-green-500 to-green-600',
+            color: 'from-slate-700 to-slate-800',
             href: '/modes/online',
             features: [
                 'Random matchmaking',
