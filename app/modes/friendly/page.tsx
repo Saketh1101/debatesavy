@@ -48,6 +48,13 @@ export default function FriendlyDebatePage() {
 
             if (response.ok) {
                 const debate = await response.json();
+                // Persist created debate temporarily in localStorage so the debate page
+                // can render immediately even if the in-memory server store isn't shared
+                try {
+                    localStorage.setItem('createdDebate', JSON.stringify(debate));
+                } catch (e) {
+                    // ignore
+                }
                 // Redirect to the debate room
                 window.location.href = `/debate/${debate.id}`;
             }

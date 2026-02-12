@@ -92,6 +92,26 @@ export default function DebateRoomPage() {
                 const data = await response.json();
                 setDebate(data);
             } else if (!isPolling) {
+                // If the server returned 404 immediately after creation, the in-memory
+                // store may be inconsistent across worker processes. Try to recover by
+                // checking a locally stored created debate payload (set by the create
+                // page) and use it as a fallback so the UI doesn't show the demo placeholder.
+                if (response.status === 404) {
+                    try {
+                        const stored = localStorage.getItem('createdDebate');
+                        if (stored) {
+                            const parsed = JSON.parse(stored);
+                            if (parsed && parsed.id === debateId) {
+                                setDebate(parsed);
+                                // remove fallback after use
+                                localStorage.removeItem('createdDebate');
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Failed to use createdDebate fallback', e);
+                    }
+                }
                 // Only redirect on initial load failure, not polling glitches
                 router.push('/dashboard');
             }
