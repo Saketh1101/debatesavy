@@ -214,8 +214,8 @@ export const AiAssistant = forwardRef(function AiAssistant({ debateId, debateMod
                                 >
                                     {msg.content.includes('__VIEW_FULL_ANALYSIS__') ? (
                                         <div>
-                                            <p className="text-sm leading-relaxed">{msg.content.replace('__VIEW_FULL_ANALYSIS__', '').trim()}</p>
-                                            <div className="mt-2">
+                                            <p className="text-sm leading-relaxed">{msg.content.replace(/__VIEW_FULL_ANALYSIS__[\s\S]*$/m, '').trim()}</p>
+                                            <div className="mt-2 flex gap-2">
                                                 <button
                                                     onClick={() => {
                                                         const el = document.getElementById('debate-summary');
@@ -225,6 +225,35 @@ export const AiAssistant = forwardRef(function AiAssistant({ debateId, debateMod
                                                     className="text-xs bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20"
                                                 >
                                                     View full analysis
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        // Try to extract embedded full analysis payload
+                                                        const m = msg.content.match(/__FULL_ANALYSIS__:(.+)$/m);
+                                                        if (m && m[1]) {
+                                                            try {
+                                                                const payload = m[1].trim();
+                                                                const decoded = typeof window !== 'undefined' && window.atob ? window.atob(payload) : Buffer.from(payload, 'base64').toString('utf8');
+                                                                const parsed = JSON.parse(decoded);
+                                                                // Format parsed result into readable text
+                                                                const parts: string[] = [];
+                                                                if (parsed.summary) parts.push(`Summary: ${parsed.summary}`);
+                                                                if (Array.isArray(parsed.proPoints)) parts.push(`PRO points:\n- ${parsed.proPoints.join('\n- ')}`);
+                                                                if (Array.isArray(parsed.conPoints)) parts.push(`CON points:\n- ${parsed.conPoints.join('\n- ')}`);
+                                                                if (Array.isArray(parsed.suggestedRebuttals)) parts.push(`Suggested rebuttals:\n- ${parsed.suggestedRebuttals.join('\n- ')}`);
+                                                                if (parts.length === 0) parts.push(JSON.stringify(parsed, null, 2));
+                                                                const content = parts.join('\n\n');
+                                                                setMessages(prev => [...prev, { role: 'assistant', content }]);
+                                                            } catch (e) {
+                                                                setMessages(prev => [...prev, { role: 'assistant', content: 'Could not decode full analysis.' }]);
+                                                            }
+                                                        } else {
+                                                            setMessages(prev => [...prev, { role: 'assistant', content: 'Full analysis not embedded.' }]);
+                                                        }
+                                                    }}
+                                                    className="text-xs bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20"
+                                                >
+                                                    Expand here
                                                 </button>
                                             </div>
                                         </div>

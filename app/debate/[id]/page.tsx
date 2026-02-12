@@ -104,15 +104,29 @@ export default function DebateRoomPage() {
 
     const handleAnalyzeDebate = async () => {
         if (!debate || !token) return;
-        const messages = (debate.arguments || []).map(arg => ({
+        const argumentMessages = (debate.arguments || []).map(arg => ({
             author: arg.user?.name || arg.userId,
             content: arg.content,
         }));
 
-        if (messages.length === 0) {
+        if (argumentMessages.length === 0) {
             setSummaryError('No arguments found to analyze. Add some PRO or CON points first.');
             return;
         }
+
+        // Build a system metadata message with title/topic/mode/participants
+        const metaParts: string[] = [];
+        if (debate.title) metaParts.push(`Debate Title: ${debate.title}`);
+        if (debate.topic) metaParts.push(`Topic: ${debate.topic}`);
+        if (debate.mode) metaParts.push(`Mode: ${debate.mode}`);
+        if (debate.participants && debate.participants.length > 0) {
+            const names = debate.participants.map(p => p.name).filter(Boolean).join(', ');
+            if (names) metaParts.push(`Participants: ${names}`);
+        }
+
+        const systemMessage = { author: 'system', content: metaParts.join('\n') };
+
+        const messages = [systemMessage, ...argumentMessages];
 
         setSummaryLoading(true);
         setSummaryError(null);
@@ -137,25 +151,37 @@ export default function DebateRoomPage() {
             setSummaryResult(data.result);
 
             // Push concise summary into AI Assistant chat with a link marker
-            try {
-                const r = data.result;
-                let short = '';
-                if (r) {
-                    if (r.summary) short = r.summary;
-                    else if (Array.isArray(r.proPoints) || Array.isArray(r.conPoints)) {
-                        const p = (r.proPoints || []).slice(0,2).join('; ');
-                        const c = (r.conPoints || []).slice(0,2).join('; ');
-                        short = [p && `PRO: ${p}`, c && `CON: ${c}`].filter(Boolean).join(' — ');
-                    } else if (r.raw) short = String(r.raw).slice(0,240);
+                try {
+                    const r = data.result;
+                    let short = '';
+                    if (r) {
+                        if (r.summary) short = r.summary;
+                        else if (Array.isArray(r.proPoints) || Array.isArray(r.conPoints)) {
+                            const p = (r.proPoints || []).slice(0,2).join('; ');
+                            const c = (r.conPoints || []).slice(0,2).join('; ');
+                            short = [p && `PRO: ${p}`, c && `CON: ${c}`].filter(Boolean).join(' — ');
+                        } else if (r.raw) {
+                            // Don't push raw streaming JSON into chat; show a friendly hint instead
+                            short = 'Full analysis available. Click to view the full analysis in the page.';
+                        }
+                    }
+                    if (!short) short = 'Debate analysis generated.';
+                    if (aiRef.current && aiRef.current.addMessage) {
+                        try {
+                            const fullStr = JSON.stringify(data.result || {});
+                            const encoded = typeof window !== 'undefined' && window.btoa ? window.btoa(fullStr) : Buffer.from(fullStr).toString('base64');
+                            const payload = `${short}\n\n__VIEW_FULL_ANALYSIS__\n__FULL_ANALYSIS__:${encoded}`;
+                            aiRef.current.addMessage({ role: 'assistant', content: payload });
+                            aiRef.current.open && aiRef.current.open();
+                        } catch (e) {
+                            // fallback to previous behavior
+                            aiRef.current.addMessage({ role: 'assistant', content: `${short}\n\n__VIEW_FULL_ANALYSIS__` });
+                            aiRef.current.open && aiRef.current.open();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not push summary to chat', e);
                 }
-                if (!short) short = 'Debate analysis generated.';
-                if (aiRef.current && aiRef.current.addMessage) {
-                    aiRef.current.addMessage({ role: 'assistant', content: `${short}\n\n__VIEW_FULL_ANALYSIS__` });
-                    aiRef.current.open && aiRef.current.open();
-                }
-            } catch (e) {
-                console.warn('Could not push summary to chat', e);
-            }
         } catch (err: any) {
             console.error('Analyze error:', err);
             setSummaryError(err?.message || 'Failed to analyze debate');
@@ -328,6 +354,12 @@ export default function DebateRoomPage() {
                                     <ul className="list-disc pl-5 text-slate-300">
                                         {summaryResult.suggestedRebuttals.map((p: string, i: number) => <li key={i}>{p}</li>)}
                                     </ul>
+                                </div>
+                            )}
+                            {summaryResult.raw && (
+                                <div className="mt-2">
+                                    <strong className="text-slate-200">Raw output:</strong>
+                                    <pre className="text-xs text-slate-300 bg-slate-900/70 p-3 rounded mt-2 overflow-auto max-h-64">{String(summaryResult.raw)}</pre>
                                 </div>
                             )}
                         </div>
