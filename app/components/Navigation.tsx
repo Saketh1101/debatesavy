@@ -12,6 +12,12 @@ export default function Navigation() {
                 Dashboard
             </Link>
             <Link
+                href="/modes"
+                className="text-slate-300 hover:text-white transition px-3 py-2 rounded-md text-sm font-medium"
+            >
+                Debate Modes
+            </Link>
+            <Link
                 href="/leaderboard"
                 className="text-slate-300 hover:text-white transition px-3 py-2 rounded-md text-sm font-medium"
             >

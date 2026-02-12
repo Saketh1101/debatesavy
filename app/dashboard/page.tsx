@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Header from '@/app/components/Header';
 import Navigation from '@/app/components/Navigation';
 import Button from '@/app/components/Button';
+import { AiAssistant } from '@/app/components/AiAssistant';
 
 interface Debate {
     id: string;
@@ -75,7 +76,6 @@ export default function DashboardPage() {
 
             <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    {/* Welcome Section */}
                     <div className="mb-12">
                         <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}! 👋</h1>
                         <p className="text-slate-400">Here's your debate activity and performance.</p>
@@ -100,15 +100,20 @@ export default function DashboardPage() {
                     {/* Actions */}
                     <div className="mb-12">
                         <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Link href="/debates/create">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <Link href="/modes/friendly">
                                 <Button variant="primary" size="lg" className="w-full">
-                                    Create New Debate
+                                    👥 Friendly Debate
                                 </Button>
                             </Link>
-                            <Link href="/debates/join">
+                            <Link href="/modes/famous">
                                 <Button variant="secondary" size="lg" className="w-full">
-                                    Join Debate
+                                    ⭐ Famous Personalities
+                                </Button>
+                            </Link>
+                            <Link href="/modes/online">
+                                <Button variant="primary" size="lg" className="w-full">
+                                    🌍 Online Debates
                                 </Button>
                             </Link>
                         </div>
@@ -154,6 +159,9 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* AI Assistant */}
+            <AiAssistant debateId="dashboard" debateMode="friendly" />
         </>
     );
 }

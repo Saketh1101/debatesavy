@@ -58,8 +58,42 @@ model Debate {
   isPublic    Boolean    @default(false)
   maxParticipants Int    @default(2)
 
+  // Debate mode: friendly, famous, online
+  mode        String     @default("friendly")
+  
+  // For friendly mode
+  numPersons  Int?
+  
+  // For famous personalities mode
+  personalityId String?
+  personality FamousPersonality? @relation(fields: [personalityId], references: [id])
+  
+  // For online debates mode
+  category    String?    // tech, politics, entertainment, sports, etc
+  difficulty  String?    // beginner, intermediate, expert
+  matchCode   String?    @unique
+
   @@index([status])
   @@index([createdAt])
+  @@index([mode])
+}
+
+model FamousPersonality {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  title       String     // e.g., "Scientist", "Philosopher", "Politician"
+  description String?
+  background  String     // Biography and key info
+  argumentStyle String   // How they argue
+  keyBeliefs  String     // Their main positions
+  famousQuotes String?
+  image       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  debates     Debate[]
+
+  @@index([name])
 }
 
 model Argument {
@@ -135,4 +169,34 @@ model Leaderboard {
 
   @@index([rating])
   @@index([rank])
+}
+
+model AIAssistantMessage {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  message   String
+  response  String
+  context   String?    // "dashboard", "debate", "analysis"
+  debateId  String?    // Optional, if related to a specific debate
+  
+  createdAt DateTime   @default(now())
+
+  @@index([userId])
+  @@index([debateId])
+}
+
+model OnlineDebatePool {
+  id          String     @id @default(cuid())
+  category    String     // tech, politics, entertainment, sports, etc
+  difficulty  String     // beginner, intermediate, expert
+  title       String
+  description String?
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([category])
+  @@index([difficulty])
 }

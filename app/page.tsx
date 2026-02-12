@@ -64,9 +64,9 @@ export default function Home() {
                     Start Debating
                   </Button>
                 </Link>
-                <Link href="#features">
+                <Link href="/modes">
                   <Button variant="outline" size="lg">
-                    Learn More
+                    Explore Modes
                   </Button>
                 </Link>
               </div>
