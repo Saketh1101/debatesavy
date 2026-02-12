@@ -32,6 +32,13 @@ export default function LoginPage() {
 
             const data = await response.json();
             localStorage.setItem('token', data.token);
+            try {
+                // Also set a cookie named `token` so server-side routes can read it as a fallback.
+                // Note: this cookie is not HttpOnly (set by client) and is intended for local prototype only.
+                document.cookie = `token=${data.token}; path=/`;
+            } catch (e) {
+                // ignore
+            }
             router.push('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

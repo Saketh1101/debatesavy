@@ -5,15 +5,30 @@ export async function withAuth(
     request: NextRequest,
     handler: (request: NextRequest, userId: string) => Promise<NextResponse>
 ): Promise<NextResponse> {
+    // First, check Authorization header
     const authHeader = request.headers.get('authorization');
+    let token: string | null = null;
 
-    if (!authHeader) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (authHeader) {
+        token = extractTokenFromHeader(authHeader);
     }
 
-    const token = extractTokenFromHeader(authHeader);
+    // Fallback: check cookie named `token` (useful for prototype/local setups)
     if (!token) {
-        return NextResponse.json({ error: 'Invalid token format' }, { status: 401 });
+        try {
+            const cookieToken = request.cookies.get && request.cookies.get('token');
+            if (cookieToken && (cookieToken as any).value) {
+                token = (cookieToken as any).value;
+            } else if (typeof cookieToken === 'string') {
+                token = cookieToken;
+            }
+        } catch (e) {
+            // ignore cookie read errors
+        }
+    }
+
+    if (!token) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyToken(token);
