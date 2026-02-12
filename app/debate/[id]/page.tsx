@@ -326,37 +326,35 @@ export default function DebateRoomPage() {
                     {/* Summary Panel */}
                     {summaryResult && (
                         <div id="debate-summary" className="max-w-7xl mx-auto px-4 py-4 bg-slate-900/60 border border-slate-700 rounded-lg mt-6">
-                            <h3 className="text-white font-bold mb-2">Debate Summary</h3>
-                            {summaryResult.summary && <p className="text-slate-300 mb-2">{summaryResult.summary}</p>}
-                            {Array.isArray(summaryResult.proPoints) && (
-                                <div className="mb-2">
-                                    <strong className="text-slate-200">PRO points:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300">
+                            <h3 className="text-white font-bold mb-2 text-lg">Debate Summary</h3>
+                            {summaryResult.summary && <p className="text-slate-300 mb-3">{summaryResult.summary}</p>}
+                            {Array.isArray(summaryResult.proPoints) && summaryResult.proPoints.length > 0 && (
+                                <div className="mb-3">
+                                    <strong className="text-blue-400">PRO points:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
                                         {summaryResult.proPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
                                     </ul>
                                 </div>
                             )}
-                            {Array.isArray(summaryResult.conPoints) && (
-                                <div className="mb-2">
-                                    <strong className="text-slate-200">CON points:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300">
+                            {Array.isArray(summaryResult.conPoints) && summaryResult.conPoints.length > 0 && (
+                                <div className="mb-3">
+                                    <strong className="text-red-400">CON points:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
                                         {summaryResult.conPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
                                     </ul>
                                 </div>
                             )}
-                            {Array.isArray(summaryResult.suggestedRebuttals) && (
-                                <div>
-                                    <strong className="text-slate-200">Suggested rebuttals:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300">
+                            {Array.isArray(summaryResult.suggestedRebuttals) && summaryResult.suggestedRebuttals.length > 0 && (
+                                <div className="mb-3">
+                                    <strong className="text-purple-400">Suggested rebuttals:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
                                         {summaryResult.suggestedRebuttals.map((p: string, i: number) => <li key={i}>{p}</li>)}
                                     </ul>
                                 </div>
                             )}
-                            {summaryResult.raw && (
-                                <div className="mt-2">
-                                    <strong className="text-slate-200">Raw output:</strong>
-                                    <pre className="text-xs text-slate-300 bg-slate-900/70 p-3 rounded mt-2 overflow-auto max-h-64">{String(summaryResult.raw)}</pre>
-                                </div>
+                            {/* If nothing structured was found, show whatever text the LLM returned */}
+                            {!summaryResult.summary && !summaryResult.proPoints && !summaryResult.conPoints && (
+                                <p className="text-slate-300 whitespace-pre-wrap">{summaryResult.raw || JSON.stringify(summaryResult, null, 2)}</p>
                             )}
                         </div>
                     )}

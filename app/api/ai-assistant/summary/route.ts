@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
         `"summary" (1-3 concise sentences), "proPoints" (array of major points for PRO), "conPoints" (array of major points for CON), and "suggestedRebuttals" (array of short rebuttals). Only output valid JSON without explanatory text.\n\nConversation:\n${convoText}`;
 
       // Call Ollama HTTP API (with timeout & retries)
-      const timeoutMs = Number(process.env.OLLAMA_TIMEOUT_MS || '15000');
+      const timeoutMs = Number(process.env.OLLAMA_TIMEOUT_MS || '60000');
       const maxRetries = Number(process.env.OLLAMA_MAX_RETRIES || '2');
       const baseBackoff = Number(process.env.OLLAMA_BACKOFF_MS || '500');
 
@@ -168,46 +168,34 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Ollama API error', details }, { status: 502 });
       }
 
+      // With stream:false, Ollama returns: { model, response: "<LLM text>", done: true, ... }
+      // The actual LLM output is in the "response" field.
+      let llmText = text;
+      try {
+        const ollamaResult = JSON.parse(text);
+        if (ollamaResult && typeof ollamaResult.response === 'string') {
+          llmText = ollamaResult.response;
+        }
+      } catch (_) {
+        // If it's not valid JSON, keep the raw text and try to parse below
+      }
+
+      // Now parse the LLM's actual output as a structured JSON summary
       let parsed: any = null;
       try {
-        // Try direct JSON parse first
-        parsed = JSON.parse(text);
+        parsed = JSON.parse(llmText);
       } catch (e) {
-        // Handle streaming-style responses produced by some local LLM servers (many small JSON objects)
+        // LLM may have included extra text around the JSON; try to extract it
         try {
-          // Extract all "response" string fragments and JSON-decode them to unescape characters
-          const respRegex = /"response":("[\s\S]*?")/gs;
-          const pieces: string[] = [];
-          for (const m of text.matchAll(respRegex)) {
-            if (m && m[1]) {
-              try {
-                // JSON.parse the quoted string to decode escapes
-                pieces.push(JSON.parse(m[1]));
-              } catch (_err) {
-                // fallback: strip surrounding quotes
-                pieces.push(m[1].slice(1, -1));
-              }
-            }
+          const jsonMatch = llmText.match(/\{[\s\S]*\}/m);
+          if (jsonMatch) {
+            parsed = JSON.parse(jsonMatch[0]);
+          } else {
+            parsed = { summary: llmText };
           }
-
-          const combined = pieces.join('');
-
-          // Try parsing the combined generation as JSON (LLM may stream a JSON object)
-          try {
-            parsed = JSON.parse(combined);
-          } catch (e2) {
-            // If combined text contains an embedded JSON substring, try to extract that
-            const jsonMatch = combined.match(/\{[\s\S]*\}/m) || text.match(/\{[\s\S]*\}/m);
-            parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: combined || text };
-          }
-        } catch (e3) {
-          // Final fallback: try to extract any JSON substring from the original text
-          try {
-            const jsonMatch = text.match(/\{[\s\S]*\}/m);
-            parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { raw: text };
-          } catch (e4) {
-            parsed = { raw: text };
-          }
+        } catch (e2) {
+          // Couldn't parse at all — wrap the raw text as the summary
+          parsed = { summary: llmText };
         }
       }
 
