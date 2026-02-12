@@ -325,30 +325,48 @@ export default function DebateRoomPage() {
 
                     {/* Summary Panel */}
                     {summaryResult && (
-                        <div id="debate-summary" className="max-w-7xl mx-auto px-4 py-4 bg-slate-900/60 border border-slate-700 rounded-lg mt-6">
+                        <div id="debate-summary" className="max-w-7xl mx-auto px-4 py-4 bg-slate-900/60 border border-slate-700 rounded-lg mt-6 mb-40">
                             <h3 className="text-white font-bold mb-2 text-lg">Debate Summary</h3>
                             {summaryResult.summary && <p className="text-slate-300 mb-3">{summaryResult.summary}</p>}
                             {Array.isArray(summaryResult.proPoints) && summaryResult.proPoints.length > 0 && (
                                 <div className="mb-3">
                                     <strong className="text-blue-400">PRO points:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
-                                        {summaryResult.proPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
+                                        {summaryResult.proPoints.map((p: any, i: number) => (
+                                            <li key={i}>
+                                                {typeof p === 'string' ? p : (
+                                                    <><span className="font-semibold text-blue-300">{p.label}:</span> {p.description}</>
+                                                )}
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             )}
                             {Array.isArray(summaryResult.conPoints) && summaryResult.conPoints.length > 0 && (
                                 <div className="mb-3">
                                     <strong className="text-red-400">CON points:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
-                                        {summaryResult.conPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
+                                        {summaryResult.conPoints.map((p: any, i: number) => (
+                                            <li key={i}>
+                                                {typeof p === 'string' ? p : (
+                                                    <><span className="font-semibold text-red-300">{p.label}:</span> {p.description}</>
+                                                )}
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             )}
                             {Array.isArray(summaryResult.suggestedRebuttals) && summaryResult.suggestedRebuttals.length > 0 && (
                                 <div className="mb-3">
                                     <strong className="text-purple-400">Suggested rebuttals:</strong>
-                                    <ul className="list-disc pl-5 text-slate-300 mt-1">
-                                        {summaryResult.suggestedRebuttals.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
+                                        {summaryResult.suggestedRebuttals.map((p: any, i: number) => (
+                                            <li key={i}>
+                                                {typeof p === 'string' ? p : (
+                                                    <><span className="font-semibold text-purple-300">{p.label}:</span> {p.description}</>
+                                                )}
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             )}
