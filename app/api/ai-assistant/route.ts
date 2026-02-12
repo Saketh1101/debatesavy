@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || '');
-
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
@@ -13,13 +11,6 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json(
                     { error: 'Message is required' },
                     { status: 400 }
-                );
-            }
-
-            if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-                return NextResponse.json(
-                    { error: 'Google Generative AI API key not configured' },
-                    { status: 500 }
                 );
             }
 
@@ -43,6 +34,11 @@ Be encouraging but also critically evaluate their position.`;
             }
 
             // Call Google Generative AI API
+            if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+                throw new Error('GOOGLE_GENERATIVE_AI_API_KEY not found in environment');
+            }
+
+            const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY);
             const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
             const fullPrompt = `${systemPrompt}\n\nUser message: ${message}`;
             const result = await model.generateContent(fullPrompt);

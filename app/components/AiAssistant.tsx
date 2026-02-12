@@ -38,10 +38,16 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
         setIsLoading(true);
 
         try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Not authenticated. Please login first.');
+            }
+
             const response = await fetch('/api/ai-assistant', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     message: userMessage,
