@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { RobotIcon, XIcon } from '@/app/components/Icons';
 
 interface AiAssistantProps {
     debateId: string;
@@ -64,10 +63,10 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40 group"
+                className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40 group text-2xl font-bold"
                 title="Open AI Assistant"
             >
-                <RobotIcon size={24} className="group-hover:scale-125 transition-transform" strokeWidth={1.3} />
+                🤖
             </button>
 
             {/* Chat Panel */}
@@ -81,10 +80,10 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="text-white hover:text-blue-100 transition-colors p-1 hover:bg-white/10 rounded"
+                            className="text-white hover:text-blue-100 transition-colors p-1 hover:bg-white/10 rounded text-lg font-bold"
                             title="Close"
                         >
-                            <XIcon size={20} strokeWidth={2.5} />
+                            ✕
                         </button>
                     </div>
 

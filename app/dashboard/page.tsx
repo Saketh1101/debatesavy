@@ -7,7 +7,6 @@ import Header from '@/app/components/Header';
 import Navigation from '@/app/components/Navigation';
 import Button from '@/app/components/Button';
 import { AiAssistant } from '@/app/components/AiAssistant';
-import { UsersIcon, StarIcon, GlobeIcon, TrophyIcon, BarChartIcon } from '@/app/components/Icons';
 
 interface Debate {
     id: string;
@@ -84,49 +83,43 @@ export default function DashboardPage() {
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
-                            <div className="flex items-center gap-3 mb-2">
-                                <TrophyIcon size={20} className="text-amber-400" strokeWidth={1.5} />
-                                <p className="text-slate-400 text-sm">Current Rating</p>
-                            </div>
-                            <p className="text-4xl font-bold text-blue-400">{user?.rating}</p>
+                        <div className="bg-gradient-to-br from-amber-500/10 to-orange-600/10 rounded-xl p-6 border border-amber-500/30 hover:border-amber-500/60 transition-all duration-300">
+                            <p className="text-slate-400 text-sm font-medium mb-3">Current Rating</p>
+                            <p className="text-5xl font-bold text-amber-400">{user?.rating}</p>
+                            <p className="text-xs text-slate-500 mt-2">Your debate expertise score</p>
                         </div>
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
-                            <div className="flex items-center gap-3 mb-2">
-                                <BarChartIcon size={20} className="text-blue-400" strokeWidth={1.5} />
-                                <p className="text-slate-400 text-sm">Total Debates</p>
-                            </div>
-                            <p className="text-4xl font-bold">{debates.length}</p>
+                        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-600/10 rounded-xl p-6 border border-blue-500/30 hover:border-blue-500/60 transition-all duration-300">
+                            <p className="text-slate-400 text-sm font-medium mb-3">Total Debates</p>
+                            <p className="text-5xl font-bold text-blue-400">{debates.length}</p>
+                            <p className="text-xs text-slate-500 mt-2">Debates participated in</p>
                         </div>
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <p className="text-slate-400 text-sm">Active Debates</p>
-                            </div>
-                            <p className="text-4xl font-bold">{debates.filter(d => d.status === 'active').length}</p>
+                        <div className="bg-gradient-to-br from-emerald-500/10 to-green-600/10 rounded-xl p-6 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300">
+                            <p className="text-slate-400 text-sm font-medium mb-3">Active Now</p>
+                            <p className="text-5xl font-bold text-emerald-400 flex items-center gap-2">
+                                {debates.filter(d => d.status === 'active').length}
+                                <span className="text-lg animate-pulse">●</span>
+                            </p>
+                            <p className="text-xs text-slate-500 mt-2">Ongoing debates</p>
                         </div>
                     </div>
 
                     {/* Actions */}
                     <div className="mb-12">
-                        <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
+                        <h2 className="text-2xl font-bold mb-6">Start a New Debate</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <Link href="/modes/friendly">
-                                <Button variant="primary" size="lg" className="w-full flex items-center justify-center gap-2 group">
-                                    <UsersIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
-                                    <span>Friendly Debate</span>
+                                <Button variant="primary" size="lg" className="w-full">
+                                    Friendly Debate
                                 </Button>
                             </Link>
                             <Link href="/modes/famous">
-                                <Button variant="secondary" size="lg" className="w-full flex items-center justify-center gap-2 group">
-                                    <StarIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
-                                    <span>Famous Personalities</span>
+                                <Button variant="secondary" size="lg" className="w-full">
+                                    Famous Personalities
                                 </Button>
                             </Link>
                             <Link href="/modes/online">
-                                <Button variant="primary" size="lg" className="w-full flex items-center justify-center gap-2 group">
-                                    <GlobeIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
-                                    <span>Online Debates</span>
+                                <Button variant="primary" size="lg" className="w-full">
+                                    Online Debates
                                 </Button>
                             </Link>
                         </div>

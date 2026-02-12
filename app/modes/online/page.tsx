@@ -4,19 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
-import {
-    LaptopIcon,
-    BuildingIcon,
-    BeakerIcon,
-    TrophyIcon,
-    FilmIcon,
-    BrainIcon,
-    DollarSignIcon,
-    LeafIcon,
-    SearchIcon,
-    GamepadIcon,
-    UsersIcon
-} from '@/app/components/Icons';
 
 export default function OnlineDebatesPage() {
     const router = useRouter();
@@ -32,14 +19,14 @@ export default function OnlineDebatesPage() {
     }, [router]);
 
     const categories = [
-        { id: 'tech', label: 'Technology', icon: LaptopIcon, color: 'from-blue-500 to-blue-600' },
-        { id: 'politics', label: 'Politics', icon: BuildingIcon, color: 'from-red-500 to-red-600' },
-        { id: 'science', label: 'Science', icon: BeakerIcon, color: 'from-green-500 to-green-600' },
-        { id: 'sports', label: 'Sports', icon: TrophyIcon, color: 'from-yellow-500 to-yellow-600' },
-        { id: 'entertainment', label: 'Entertainment', icon: FilmIcon, color: 'from-pink-500 to-pink-600' },
-        { id: 'philosophy', label: 'Philosophy', icon: BrainIcon, color: 'from-purple-500 to-purple-600' },
-        { id: 'economics', label: 'Economics', icon: DollarSignIcon, color: 'from-amber-500 to-amber-600' },
-        { id: 'environment', label: 'Environment', icon: LeafIcon, color: 'from-teal-500 to-teal-600' },
+        { id: 'tech', label: 'Technology', emoji: '💻', color: 'from-blue-500 to-blue-600' },
+        { id: 'politics', label: 'Politics', emoji: '🏛️', color: 'from-red-500 to-red-600' },
+        { id: 'science', label: 'Science', emoji: '🔬', color: 'from-green-500 to-green-600' },
+        { id: 'sports', label: 'Sports', emoji: '⚽', color: 'from-yellow-500 to-yellow-600' },
+        { id: 'entertainment', label: 'Entertainment', emoji: '🎬', color: 'from-pink-500 to-pink-600' },
+        { id: 'philosophy', label: 'Philosophy', emoji: '💭', color: 'from-purple-500 to-purple-600' },
+        { id: 'economics', label: 'Economics', emoji: '💰', color: 'from-amber-500 to-amber-600' },
+        { id: 'environment', label: 'Environment', emoji: '🌍', color: 'from-teal-500 to-teal-600' },
     ];
 
     const difficulties = [
@@ -137,26 +124,21 @@ export default function OnlineDebatesPage() {
                     <div className="md:col-span-2 space-y-8">
                         {/* Category Selection */}
                         <div className="bg-slate-900 rounded-lg border border-slate-800 p-8">
-                            <h2 className="text-2xl font-bold text-white mb-6">Select a Category</h2>
+                            <h2 className="text-2xl font-bold text-white mb-6">Choose a Debate Category</h2>
                             <div className="grid grid-cols-2 gap-4">
-                                {categories.map((cat) => {
-                                    const IconComponent = cat.icon;
-                                    return (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => setSelectedCategory(cat.id)}
-                                            className={`p-6 rounded-lg border-2 transition-all duration-300 group ${selectedCategory === cat.id
-                                                ? 'border-blue-500 bg-slate-800 shadow-lg shadow-blue-500/20'
-                                                : 'border-slate-700 bg-slate-800 hover:border-slate-600 hover:bg-slate-750'
-                                                }`}
-                                        >
-                                            <div className="mb-3 flex justify-center text-slate-300 group-hover:text-blue-400 transition-colors duration-300">
-                                                <IconComponent size={32} strokeWidth={1.3} />
-                                            </div>
-                                            <div className={`font-semibold transition-colors duration-300 ${selectedCategory === cat.id ? 'text-blue-400' : 'text-white group-hover:text-blue-400'}`}>{cat.label}</div>
-                                        </button>
-                                    );
-                                })}
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className={`p-6 rounded-lg border-2 transition-all duration-300 text-center ${selectedCategory === cat.id
+                                            ? 'border-blue-500 bg-slate-700 shadow-lg shadow-blue-500/20'
+                                            : 'border-slate-700 bg-slate-800 hover:border-blue-400 hover:bg-slate-750'
+                                            }`}
+                                    >
+                                        <div className="text-4xl mb-2">{cat.emoji}</div>
+                                        <div className={`font-semibold text-lg transition-colors duration-300 ${selectedCategory === cat.id ? 'text-blue-300' : 'text-white'}`}>{cat.label}</div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
@@ -170,12 +152,12 @@ export default function OnlineDebatesPage() {
                                             key={diff.id}
                                             onClick={() => setSelectedDifficulty(diff.id)}
                                             className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedDifficulty === diff.id
-                                                ? 'border-blue-500 bg-slate-800'
-                                                : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                                                ? 'border-blue-500 bg-slate-700'
+                                                : 'border-slate-700 bg-slate-800 hover:border-blue-400'
                                                 }`}
                                         >
-                                            <div className="font-semibold text-white">{diff.label}</div>
-                                            <div className="text-sm text-gray-400">{diff.description}</div>
+                                            <div className="font-semibold text-white text-lg">{diff.label}</div>
+                                            <div className="text-sm text-gray-400 mt-1">{diff.description}</div>
                                         </button>
                                     ))}
                                 </div>
@@ -191,13 +173,12 @@ export default function OnlineDebatesPage() {
                             >
                                 {isSearching ? (
                                     <>
-                                        <SearchIcon size={20} className="animate-spin" strokeWidth={2} />
+                                        <span className="inline-block animate-spin">⏳</span>
                                         Searching for Opponent...
                                     </>
                                 ) : (
                                     <>
-                                        <GamepadIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={2} />
-                                        Find Opponent
+                                        Find Your Next Opponent
                                     </>
                                 )}
                             </button>
@@ -220,7 +201,7 @@ export default function OnlineDebatesPage() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">
                                             <div className="flex items-center gap-1.5">
-                                                <UsersIcon size={14} strokeWidth={2} className="text-slate-500" />
+                                                <span className="text-sm">👥</span>
                                                 <span>{debate.participants} players</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">

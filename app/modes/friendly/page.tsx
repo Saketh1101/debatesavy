@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
-import { LightbulbIcon, RobotIcon, MinusIcon, PlusIcon } from '@/app/components/Icons';
 
 export default function FriendlyDebatePage() {
     const router = useRouter();
@@ -108,26 +107,26 @@ export default function FriendlyDebatePage() {
                             {/* Number of Persons */}
                             <div className="mb-8">
                                 <label className="block text-white font-semibold mb-4">Number of Participants</label>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-6">
                                     <button
                                         onClick={() => setNumPersons(Math.max(2, numPersons - 1))}
-                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-3 rounded transition-all hover:scale-110 active:scale-95"
+                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded transition-all hover:scale-110 active:scale-95 text-xl"
                                         title="Decrease participants"
                                     >
-                                        <MinusIcon size={20} strokeWidth={2} />
+                                        −
                                     </button>
-                                    <div className="text-4xl font-bold text-blue-400 w-20 text-center">
+                                    <div className="text-5xl font-bold text-blue-400 w-20 text-center">
                                         {numPersons}
                                     </div>
                                     <button
                                         onClick={() => setNumPersons(Math.min(8, numPersons + 1))}
-                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-3 rounded transition-all hover:scale-110 active:scale-95"
+                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded transition-all hover:scale-110 active:scale-95 text-xl"
                                         title="Increase participants"
                                     >
-                                        <PlusIcon size={20} strokeWidth={2} />
+                                        +
                                     </button>
                                 </div>
-                                <p className="text-gray-400 text-sm mt-3">2-8 participants (including you)</p>
+                                <p className="text-gray-400 text-sm mt-4">Between 2 and 8 participants (including you)</p>
                             </div>
 
                             {/* Create Button */}
@@ -142,12 +141,9 @@ export default function FriendlyDebatePage() {
                     </div>
 
                     {/* Side Panel - Tips */}
-                    <div className="bg-slate-900 rounded-lg border border-slate-800 p-6 h-fit">
-                        <div className="flex items-center gap-3 mb-4">
-                            <LightbulbIcon size={24} className="text-yellow-400" strokeWidth={1.5} />
-                            <h3 className="text-xl font-bold text-white">Tips</h3>
-                        </div>
-                        <ul className="space-y-3 text-gray-400 text-sm">
+                    <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30 p-6 h-fit">
+                        <h3 className="text-xl font-bold text-white mb-4">💡 Tips for Great Debates</h3>
+                        <ul className="space-y-3 text-gray-300 text-sm">
                             <li className="flex gap-2">
                                 <span className="text-green-400">✓</span>
                                 <span>Be specific with your debate title</span>
@@ -172,7 +168,7 @@ export default function FriendlyDebatePage() {
 
                         <div className="mt-6 pt-6 border-t border-slate-700">
                             <div className="flex items-center gap-2 mb-2">
-                                <RobotIcon size={18} className="text-blue-400" strokeWidth={1.5} />
+                                <span className="text-xl">🤖</span>
                                 <h4 className="text-white font-semibold">AI Assistant</h4>
                             </div>
                             <p className="text-gray-400 text-sm">

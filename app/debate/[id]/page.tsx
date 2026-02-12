@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
 import { AiAssistant } from '@/app/components/AiAssistant';
-import { UsersIcon, BarChartIcon, LightbulbIcon, Clock, MessageSquare } from '@/app/components/Icons';
 
 interface Argument {
     id: string;
@@ -224,54 +223,31 @@ export default function DebateRoomPage() {
                         {/* Sidebar - Stats and Info */}
                         <div className="space-y-6">
                             {/* Mode Info */}
-                            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">Debate Info</h3>
-                                <div className="space-y-4 text-slate-300">
-                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                                        <div className="text-blue-400 mt-0.5">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-400">Mode</p>
-                                            <p className="font-semibold capitalize">{debate.mode}</p>
-                                        </div>
+                            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/30 p-6">
+                                <h3 className="text-lg font-bold text-white mb-4">Debate Details</h3>
+                                <div className="space-y-4">
+                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-blue-500">
+                                        <p className="text-xs text-slate-400 mb-1">Debate Format</p>
+                                        <p className="font-semibold text-white capitalize">{debate.mode}</p>
                                     </div>
-                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                                        <div className="text-green-400 mt-0.5">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="1" /><path d="M12 1v6m0 6v6m11-11h-6m-6 0h-6m9.5 9.5l-4.24 4.24m0-8.48l4.24 4.24" /></svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-400">Status</p>
-                                            <p className="font-semibold capitalize">{debate.status}</p>
-                                        </div>
+                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-green-500">
+                                        <p className="text-xs text-slate-400 mb-1">Current Status</p>
+                                        <p className="font-semibold text-white capitalize">{debate.status}</p>
                                     </div>
-                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                                        <div className="text-purple-400 mt-0.5">
-                                            <UsersIcon size={18} strokeWidth={1.5} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-400">Participants</p>
-                                            <p className="font-semibold">{debate.participants.length}</p>
-                                        </div>
+                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-purple-500">
+                                        <p className="text-xs text-slate-400 mb-1">Participants</p>
+                                        <p className="font-semibold text-white">{debate.participants.length} People</p>
                                     </div>
-                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
-                                        <div className="text-amber-400 mt-0.5">
-                                            <MessageSquare size={18} strokeWidth={1.5} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-400">Arguments</p>
-                                            <p className="font-semibold">{debate.arguments?.length || 0}</p>
-                                        </div>
+                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-amber-500">
+                                        <p className="text-xs text-slate-400 mb-1">Total Arguments</p>
+                                        <p className="font-semibold text-white">{debate.arguments?.length || 0} Submitted</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* AI Insights */}
-                            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <LightbulbIcon size={24} className="text-yellow-400" strokeWidth={1.5} />
-                                    <h3 className="text-lg font-bold text-white">AI Insights</h3>
-                                </div>
+                            <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/30 p-6">
+                                <h3 className="text-lg font-bold text-white mb-4">💡 Debate Tips</h3>
                                 <div className="space-y-2 text-slate-300 text-sm">
                                     <p>• Use evidence to support your claims</p>
                                     <p>• Address opposing viewpoints directly</p>
