@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+// Prefer SESSION_SECRET (used in .env.example) for consistency, fall back to JWT_SECRET
+const JWT_SECRET = process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-secret';
 const TOKEN_EXPIRY = '7d';
 
 export async function hashPassword(password: string): Promise<string> {

@@ -272,4 +272,4 @@ export const AiAssistant = forwardRef(function AiAssistant({ debateId, debateMod
             )}
         </>
     );
-}
+});
