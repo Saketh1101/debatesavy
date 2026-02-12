@@ -54,7 +54,11 @@ export default function DebateRoomPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
+    const [summaryLoading, setSummaryLoading] = useState(false);
+    const [summaryResult, setSummaryResult] = useState<any>(null);
+    const [summaryError, setSummaryError] = useState<string | null>(null);
     const pollingInterval = useRef<NodeJS.Timeout | null>(null);
+    const aiRef = useRef<any>(null);
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -95,6 +99,63 @@ export default function DebateRoomPage() {
             console.error('Error loading debate:', error);
         } finally {
             if (!isPolling) setLoading(false);
+        }
+    };
+
+    const handleAnalyzeDebate = async () => {
+        if (!debate || !token) return;
+        setSummaryLoading(true);
+        setSummaryError(null);
+        setSummaryResult(null);
+
+        try {
+            const messages = (debate.arguments || []).map(arg => ({
+                author: arg.user?.name || arg.userId,
+                content: arg.content,
+            }));
+
+            const res = await fetch('/api/ai-assistant/summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ messages }),
+            });
+
+            if (!res.ok) {
+                const txt = await res.text();
+                throw new Error(txt || 'Summary API error');
+            }
+
+            const data = await res.json();
+            setSummaryResult(data.result);
+
+            // Push concise summary into AI Assistant chat with a link marker
+            try {
+                const r = data.result;
+                let short = '';
+                if (r) {
+                    if (r.summary) short = r.summary;
+                    else if (Array.isArray(r.proPoints) || Array.isArray(r.conPoints)) {
+                        const p = (r.proPoints || []).slice(0,2).join('; ');
+                        const c = (r.conPoints || []).slice(0,2).join('; ');
+                        short = [p && `PRO: ${p}`, c && `CON: ${c}`].filter(Boolean).join(' — ');
+                    } else if (r.raw) short = String(r.raw).slice(0,240);
+                }
+                if (!short) short = 'Debate analysis generated.';
+                if (aiRef.current && aiRef.current.addMessage) {
+                    aiRef.current.addMessage({ role: 'assistant', content: `${short}\n\n__VIEW_FULL_ANALYSIS__` });
+                    aiRef.current.open && aiRef.current.open();
+                }
+            } catch (e) {
+                console.warn('Could not push summary to chat', e);
+            }
+        } catch (err: any) {
+            console.error('Analyze error:', err);
+            setSummaryError(err?.message || 'Failed to analyze debate');
+        } finally {
+            setSummaryLoading(false);
         }
     };
 
@@ -180,6 +241,13 @@ export default function DebateRoomPage() {
                                         'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'}`}>
                                 {debate.status.toUpperCase()}
                             </span>
+                            <button
+                                onClick={handleAnalyzeDebate}
+                                disabled={summaryLoading}
+                                className="ml-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm font-semibold disabled:opacity-50"
+                            >
+                                {summaryLoading ? 'Analyzing...' : 'Analyze Debate'}
+                            </button>
                         </div>
                     </div>
 
@@ -219,6 +287,38 @@ export default function DebateRoomPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Summary Panel */}
+                    {summaryResult && (
+                        <div id="debate-summary" className="max-w-7xl mx-auto px-4 py-4 bg-slate-900/60 border border-slate-700 rounded-lg mt-6">
+                            <h3 className="text-white font-bold mb-2">Debate Summary</h3>
+                            {summaryResult.summary && <p className="text-slate-300 mb-2">{summaryResult.summary}</p>}
+                            {Array.isArray(summaryResult.proPoints) && (
+                                <div className="mb-2">
+                                    <strong className="text-slate-200">PRO points:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300">
+                                        {summaryResult.proPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+                            {Array.isArray(summaryResult.conPoints) && (
+                                <div className="mb-2">
+                                    <strong className="text-slate-200">CON points:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300">
+                                        {summaryResult.conPoints.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+                            {Array.isArray(summaryResult.suggestedRebuttals) && (
+                                <div>
+                                    <strong className="text-slate-200">Suggested rebuttals:</strong>
+                                    <ul className="list-disc pl-5 text-slate-300">
+                                        {summaryResult.suggestedRebuttals.map((p: string, i: number) => <li key={i}>{p}</li>)}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Input Area */}
                     <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-4 md:p-6 shadow-2xl z-40">
@@ -269,7 +369,7 @@ export default function DebateRoomPage() {
             </div>
 
             {/* AI Assistant */}
-            {token && debate && <AiAssistant debateId={debate.id} debateMode={debate.mode} personalityName={debate.personalityName} />}
+            {token && debate && <AiAssistant ref={aiRef} debateId={debate.id} debateMode={debate.mode} personalityName={debate.personalityName} />}
         </>
     );
 }

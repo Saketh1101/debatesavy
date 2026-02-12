@@ -1,6 +1,6 @@
-'use client';
+ 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 interface AiAssistantProps {
     debateId: string;
@@ -8,8 +8,10 @@ interface AiAssistantProps {
     personalityName?: string;
 }
 
-export function AiAssistant({ debateId, debateMode, personalityName }: AiAssistantProps) {
+export const AiAssistant = forwardRef(function AiAssistant({ debateId, debateMode, personalityName }: AiAssistantProps, ref) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+    const [summaryError, setSummaryError] = useState<string | null>(null);
     const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([
         {
             role: 'assistant',
@@ -27,6 +29,13 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    useImperativeHandle(ref, () => ({
+        addMessage: (msg: { role: 'user' | 'assistant'; content: string }) => {
+            setMessages(prev => [...prev, msg]);
+        },
+        open: () => setIsOpen(true),
+    }));
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,10 +79,63 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
             console.error('Error:', error);
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: 'Sorry, I encountered an error. Please check that your Google Gemini API key is configured and try again.'
+                content: 'Sorry, I encountered an error generating a response. Please try again later.'
             }]);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleGenerateSummary = async () => {
+        if (isSummaryLoading) return;
+        setIsSummaryLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Not authenticated');
+            setSummaryError(null);
+            const res = await fetch('/api/ai-assistant/summary', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ debateId }),
+            });
+
+            if (!res.ok) {
+                const txt = await res.text();
+                const msg = `Summary API error: ${txt}`;
+                setSummaryError(msg);
+                throw new Error(msg);
+            }
+
+            const data = await res.json();
+            const result = data.result;
+
+            let content = '';
+            if (!result) {
+                content = 'No summary returned from the server.';
+            } else if (result.raw && typeof result.raw === 'string') {
+                content = `Summary (raw):\n${result.raw}`;
+            } else if (typeof result === 'object') {
+                const parts: string[] = [];
+                if (result.summary) parts.push(`Summary: ${result.summary}`);
+                if (Array.isArray(result.proPoints)) parts.push(`PRO points:\n- ${result.proPoints.join('\n- ')}`);
+                if (Array.isArray(result.conPoints)) parts.push(`CON points:\n- ${result.conPoints.join('\n- ')}`);
+                if (Array.isArray(result.suggestedRebuttals)) parts.push(`Suggested rebuttals:\n- ${result.suggestedRebuttals.join('\n- ')}`);
+                if (parts.length === 0) parts.push(JSON.stringify(result, null, 2));
+                content = parts.join('\n\n');
+            } else {
+                content = String(result);
+            }
+
+            setMessages(prev => [...prev, { role: 'assistant', content }]);
+        } catch (err) {
+            console.error('Summary error:', err);
+            if (!summaryError) setSummaryError('Failed to generate summary. Check server logs.');
+            setMessages(prev => [...prev, { role: 'assistant', content: 'Failed to generate summary. You can retry.' }]);
+        } finally {
+            setIsSummaryLoading(false);
         }
     };
 
@@ -97,14 +159,45 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
                             <h3 className="text-white font-bold">AI Debate Assistant</h3>
                             <p className="text-blue-100 text-xs">Always here to help</p>
                         </div>
-                        <button
-                            onClick={() => setIsOpen(false)}
-                            className="text-white hover:text-blue-100 transition-colors p-1 hover:bg-white/10 rounded text-lg font-bold"
-                            title="Close"
-                        >
-                            ×
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleGenerateSummary}
+                                disabled={isSummaryLoading}
+                                className="bg-white/10 text-white text-sm px-3 py-1 rounded hover:bg-white/20 disabled:opacity-50"
+                                title="Generate debate summary"
+                            >
+                                {isSummaryLoading ? 'Summarizing...' : 'Generate Summary'}
+                            </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="text-white hover:text-blue-100 transition-colors p-1 hover:bg-white/10 rounded text-lg font-bold"
+                                title="Close"
+                            >
+                                ×
+                            </button>
+                        </div>
                     </div>
+
+                    {summaryError && (
+                        <div className="px-4 py-2 bg-red-700/10 border-t border-red-600/20 text-sm text-red-200 flex items-center justify-between">
+                            <div className="mr-2">{summaryError}</div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleGenerateSummary}
+                                    disabled={isSummaryLoading}
+                                    className="text-sm bg-red-600/80 hover:bg-red-600 px-2 py-1 rounded disabled:opacity-50"
+                                >
+                                    {isSummaryLoading ? 'Retrying...' : 'Retry'}
+                                </button>
+                                <button
+                                    onClick={() => setSummaryError(null)}
+                                    className="text-sm text-red-200/80 hover:text-white px-2 py-1 rounded"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -119,7 +212,25 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
                                         : 'bg-slate-800 text-gray-100 rounded-bl-none border border-slate-700'
                                         }`}
                                 >
-                                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                                    {msg.content.includes('__VIEW_FULL_ANALYSIS__') ? (
+                                        <div>
+                                            <p className="text-sm leading-relaxed">{msg.content.replace('__VIEW_FULL_ANALYSIS__', '').trim()}</p>
+                                            <div className="mt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const el = document.getElementById('debate-summary');
+                                                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                        setIsOpen(false);
+                                                    }}
+                                                    className="text-xs bg-white/10 text-white px-2 py-1 rounded hover:bg-white/20"
+                                                >
+                                                    View full analysis
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm leading-relaxed">{msg.content}</p>
+                                    )}
                                 </div>
                             </div>
                         ))}
