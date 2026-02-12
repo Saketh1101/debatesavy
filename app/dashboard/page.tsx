@@ -7,6 +7,7 @@ import Header from '@/app/components/Header';
 import Navigation from '@/app/components/Navigation';
 import Button from '@/app/components/Button';
 import { AiAssistant } from '@/app/components/AiAssistant';
+import { UsersIcon, StarIcon, GlobeIcon, TrophyIcon, BarChartIcon } from '@/app/components/Icons';
 
 interface Debate {
     id: string;
@@ -77,22 +78,31 @@ export default function DashboardPage() {
             <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="mb-12">
-                        <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}! 👋</h1>
+                        <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name}!</h1>
                         <p className="text-slate-400">Here's your debate activity and performance.</p>
                     </div>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p className="text-slate-400 text-sm mb-2">Current Rating</p>
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
+                            <div className="flex items-center gap-3 mb-2">
+                                <TrophyIcon size={20} className="text-amber-400" strokeWidth={1.5} />
+                                <p className="text-slate-400 text-sm">Current Rating</p>
+                            </div>
                             <p className="text-4xl font-bold text-blue-400">{user?.rating}</p>
                         </div>
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p className="text-slate-400 text-sm mb-2">Total Debates</p>
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
+                            <div className="flex items-center gap-3 mb-2">
+                                <BarChartIcon size={20} className="text-blue-400" strokeWidth={1.5} />
+                                <p className="text-slate-400 text-sm">Total Debates</p>
+                            </div>
                             <p className="text-4xl font-bold">{debates.length}</p>
                         </div>
-                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                            <p className="text-slate-400 text-sm mb-2">Active Debates</p>
+                        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <p className="text-slate-400 text-sm">Active Debates</p>
+                            </div>
                             <p className="text-4xl font-bold">{debates.filter(d => d.status === 'active').length}</p>
                         </div>
                     </div>
@@ -102,18 +112,21 @@ export default function DashboardPage() {
                         <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <Link href="/modes/friendly">
-                                <Button variant="primary" size="lg" className="w-full">
-                                    👥 Friendly Debate
+                                <Button variant="primary" size="lg" className="w-full flex items-center justify-center gap-2 group">
+                                    <UsersIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                                    <span>Friendly Debate</span>
                                 </Button>
                             </Link>
                             <Link href="/modes/famous">
-                                <Button variant="secondary" size="lg" className="w-full">
-                                    ⭐ Famous Personalities
+                                <Button variant="secondary" size="lg" className="w-full flex items-center justify-center gap-2 group">
+                                    <StarIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                                    <span>Famous Personalities</span>
                                 </Button>
                             </Link>
                             <Link href="/modes/online">
-                                <Button variant="primary" size="lg" className="w-full">
-                                    🌍 Online Debates
+                                <Button variant="primary" size="lg" className="w-full flex items-center justify-center gap-2 group">
+                                    <GlobeIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                                    <span>Online Debates</span>
                                 </Button>
                             </Link>
                         </div>

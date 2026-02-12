@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
+import { LightbulbIcon, RobotIcon, MinusIcon, PlusIcon } from '@/app/components/Icons';
 
 export default function FriendlyDebatePage() {
     const router = useRouter();
@@ -110,18 +111,20 @@ export default function FriendlyDebatePage() {
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setNumPersons(Math.max(2, numPersons - 1))}
-                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-3 rounded transition-all hover:scale-110 active:scale-95"
+                                        title="Decrease participants"
                                     >
-                                        −
+                                        <MinusIcon size={20} strokeWidth={2} />
                                     </button>
                                     <div className="text-4xl font-bold text-blue-400 w-20 text-center">
                                         {numPersons}
                                     </div>
                                     <button
                                         onClick={() => setNumPersons(Math.min(8, numPersons + 1))}
-                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded"
+                                        className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-3 rounded transition-all hover:scale-110 active:scale-95"
+                                        title="Increase participants"
                                     >
-                                        +
+                                        <PlusIcon size={20} strokeWidth={2} />
                                     </button>
                                 </div>
                                 <p className="text-gray-400 text-sm mt-3">2-8 participants (including you)</p>
@@ -140,32 +143,38 @@ export default function FriendlyDebatePage() {
 
                     {/* Side Panel - Tips */}
                     <div className="bg-slate-900 rounded-lg border border-slate-800 p-6 h-fit">
-                        <h3 className="text-xl font-bold text-white mb-4">💡 Tips</h3>
+                        <div className="flex items-center gap-3 mb-4">
+                            <LightbulbIcon size={24} className="text-yellow-400" strokeWidth={1.5} />
+                            <h3 className="text-xl font-bold text-white">Tips</h3>
+                        </div>
                         <ul className="space-y-3 text-gray-400 text-sm">
                             <li className="flex gap-2">
-                                <span>✓</span>
+                                <span className="text-green-400">✓</span>
                                 <span>Be specific with your debate title</span>
                             </li>
                             <li className="flex gap-2">
-                                <span>✓</span>
+                                <span className="text-green-400">✓</span>
                                 <span>Provide context in the topic description</span>
                             </li>
                             <li className="flex gap-2">
-                                <span>✓</span>
+                                <span className="text-green-400">✓</span>
                                 <span>2-4 people works best for good pacing</span>
                             </li>
                             <li className="flex gap-2">
-                                <span>✓</span>
+                                <span className="text-green-400">✓</span>
                                 <span>AI assistant will provide feedback</span>
                             </li>
                             <li className="flex gap-2">
-                                <span>✓</span>
+                                <span className="text-green-400">✓</span>
                                 <span>Share the room code with friends</span>
                             </li>
                         </ul>
 
                         <div className="mt-6 pt-6 border-t border-slate-700">
-                            <h4 className="text-white font-semibold mb-2">🤖 AI Assistant</h4>
+                            <div className="flex items-center gap-2 mb-2">
+                                <RobotIcon size={18} className="text-blue-400" strokeWidth={1.5} />
+                                <h4 className="text-white font-semibold">AI Assistant</h4>
+                            </div>
                             <p className="text-gray-400 text-sm">
                                 An AI will monitor your debate, provide real-time suggestions, and generate analytics after completion.
                             </p>

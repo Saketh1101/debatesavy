@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
 import { AiAssistant } from '@/app/components/AiAssistant';
+import { UsersIcon, BarChartIcon, LightbulbIcon, Clock, MessageSquare } from '@/app/components/Icons';
 
 interface Argument {
     id: string;
@@ -225,29 +226,52 @@ export default function DebateRoomPage() {
                             {/* Mode Info */}
                             <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
                                 <h3 className="text-lg font-bold text-white mb-4">Debate Info</h3>
-                                <div className="space-y-3 text-slate-300">
-                                    <div>
-                                        <p className="text-sm text-slate-400">Mode</p>
-                                        <p className="font-semibold capitalize">{debate.mode}</p>
+                                <div className="space-y-4 text-slate-300">
+                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                        <div className="text-blue-400 mt-0.5">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Mode</p>
+                                            <p className="font-semibold capitalize">{debate.mode}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-slate-400">Status</p>
-                                        <p className="font-semibold capitalize">{debate.status}</p>
+                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                        <div className="text-green-400 mt-0.5">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="1" /><path d="M12 1v6m0 6v6m11-11h-6m-6 0h-6m9.5 9.5l-4.24 4.24m0-8.48l4.24 4.24" /></svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Status</p>
+                                            <p className="font-semibold capitalize">{debate.status}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-slate-400">Participants</p>
-                                        <p className="font-semibold">{debate.participants.length}</p>
+                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                        <div className="text-purple-400 mt-0.5">
+                                            <UsersIcon size={18} strokeWidth={1.5} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Participants</p>
+                                            <p className="font-semibold">{debate.participants.length}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-slate-400">Arguments</p>
-                                        <p className="font-semibold">{debate.arguments?.length || 0}</p>
+                                    <div className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                        <div className="text-amber-400 mt-0.5">
+                                            <MessageSquare size={18} strokeWidth={1.5} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400">Arguments</p>
+                                            <p className="font-semibold">{debate.arguments?.length || 0}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* AI Insights */}
                             <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">💡 AI Insights</h3>
+                                <div className="flex items-center gap-2 mb-4">
+                                    <LightbulbIcon size={24} className="text-yellow-400" strokeWidth={1.5} />
+                                    <h3 className="text-lg font-bold text-white">AI Insights</h3>
+                                </div>
                                 <div className="space-y-2 text-slate-300 text-sm">
                                     <p>• Use evidence to support your claims</p>
                                     <p>• Address opposing viewpoints directly</p>

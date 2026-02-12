@@ -4,6 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
+import {
+    LaptopIcon,
+    BuildingIcon,
+    BeakerIcon,
+    TrophyIcon,
+    FilmIcon,
+    BrainIcon,
+    DollarSignIcon,
+    LeafIcon,
+    SearchIcon,
+    GamepadIcon,
+    UsersIcon
+} from '@/app/components/Icons';
 
 export default function OnlineDebatesPage() {
     const router = useRouter();
@@ -19,14 +32,14 @@ export default function OnlineDebatesPage() {
     }, [router]);
 
     const categories = [
-        { id: 'tech', label: 'Technology', icon: '💻', color: 'from-blue-500 to-blue-600' },
-        { id: 'politics', label: 'Politics', icon: '🏛️', color: 'from-red-500 to-red-600' },
-        { id: 'science', label: 'Science', icon: '🔬', color: 'from-green-500 to-green-600' },
-        { id: 'sports', label: 'Sports', icon: '⚽', color: 'from-yellow-500 to-yellow-600' },
-        { id: 'entertainment', label: 'Entertainment', icon: '🎬', color: 'from-pink-500 to-pink-600' },
-        { id: 'philosophy', label: 'Philosophy', icon: '💭', color: 'from-purple-500 to-purple-600' },
-        { id: 'economics', label: 'Economics', icon: '💰', color: 'from-amber-500 to-amber-600' },
-        { id: 'environment', label: 'Environment', icon: '🌍', color: 'from-teal-500 to-teal-600' },
+        { id: 'tech', label: 'Technology', icon: LaptopIcon, color: 'from-blue-500 to-blue-600' },
+        { id: 'politics', label: 'Politics', icon: BuildingIcon, color: 'from-red-500 to-red-600' },
+        { id: 'science', label: 'Science', icon: BeakerIcon, color: 'from-green-500 to-green-600' },
+        { id: 'sports', label: 'Sports', icon: TrophyIcon, color: 'from-yellow-500 to-yellow-600' },
+        { id: 'entertainment', label: 'Entertainment', icon: FilmIcon, color: 'from-pink-500 to-pink-600' },
+        { id: 'philosophy', label: 'Philosophy', icon: BrainIcon, color: 'from-purple-500 to-purple-600' },
+        { id: 'economics', label: 'Economics', icon: DollarSignIcon, color: 'from-amber-500 to-amber-600' },
+        { id: 'environment', label: 'Environment', icon: LeafIcon, color: 'from-teal-500 to-teal-600' },
     ];
 
     const difficulties = [
@@ -126,19 +139,24 @@ export default function OnlineDebatesPage() {
                         <div className="bg-slate-900 rounded-lg border border-slate-800 p-8">
                             <h2 className="text-2xl font-bold text-white mb-6">Select a Category</h2>
                             <div className="grid grid-cols-2 gap-4">
-                                {categories.map((cat) => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => setSelectedCategory(cat.id)}
-                                        className={`p-4 rounded-lg border-2 transition-all ${selectedCategory === cat.id
-                                            ? 'border-blue-500 bg-slate-800'
-                                            : 'border-slate-700 bg-slate-800 hover:border-slate-600'
-                                            }`}
-                                    >
-                                        <div className="text-3xl mb-2">{cat.icon}</div>
-                                        <div className="text-white font-semibold">{cat.label}</div>
-                                    </button>
-                                ))}
+                                {categories.map((cat) => {
+                                    const IconComponent = cat.icon;
+                                    return (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => setSelectedCategory(cat.id)}
+                                            className={`p-6 rounded-lg border-2 transition-all duration-300 group ${selectedCategory === cat.id
+                                                ? 'border-blue-500 bg-slate-800 shadow-lg shadow-blue-500/20'
+                                                : 'border-slate-700 bg-slate-800 hover:border-slate-600 hover:bg-slate-750'
+                                                }`}
+                                        >
+                                            <div className="mb-3 flex justify-center text-slate-300 group-hover:text-blue-400 transition-colors duration-300">
+                                                <IconComponent size={32} strokeWidth={1.3} />
+                                            </div>
+                                            <div className={`font-semibold transition-colors duration-300 ${selectedCategory === cat.id ? 'text-blue-400' : 'text-white group-hover:text-blue-400'}`}>{cat.label}</div>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -169,27 +187,46 @@ export default function OnlineDebatesPage() {
                             <button
                                 onClick={handleFindOpponent}
                                 disabled={isSearching}
-                                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-lg transition-all disabled:opacity-50 text-lg"
+                                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 rounded-lg transition-all disabled:opacity-50 text-lg flex items-center justify-center gap-3 group"
                             >
-                                {isSearching ? '🔍 Searching for Opponent...' : '🎮 Find Opponent'}
+                                {isSearching ? (
+                                    <>
+                                        <SearchIcon size={20} className="animate-spin" strokeWidth={2} />
+                                        Searching for Opponent...
+                                    </>
+                                ) : (
+                                    <>
+                                        <GamepadIcon size={20} className="group-hover:scale-110 transition-transform" strokeWidth={2} />
+                                        Find Opponent
+                                    </>
+                                )}
                             </button>
                         )}
                     </div>
 
                     {/* Right Panel - Active Debates */}
                     <div className="bg-slate-900 rounded-lg border border-slate-800 p-6 h-fit">
-                        <h3 className="text-xl font-bold text-white mb-4">🔴 Active Debates</h3>
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <h3 className="text-xl font-bold text-white">Active Debates</h3>
+                        </div>
                         <div className="space-y-3">
                             {activeDebates.map((debate) => (
                                 <Link key={debate.id} href={`/debate/${debate.id}`}>
-                                    <div className="bg-slate-800 hover:bg-slate-700 p-4 rounded-lg cursor-pointer transition-all border border-slate-700 hover:border-blue-500">
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h4 className="text-white font-semibold text-sm flex-1">{debate.title}</h4>
-                                            <span className="text-xs bg-red-900 text-red-200 px-2 py-1 rounded">LIVE</span>
+                                    <div className="bg-slate-800 hover:bg-slate-700 p-4 rounded-lg cursor-pointer transition-all duration-300 border border-slate-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <h4 className="text-white font-semibold text-sm flex-1 group">{debate.title}</h4>
+                                            <span className="text-xs bg-red-900/80 text-red-200 px-2 py-1 rounded font-semibold">LIVE</span>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                            <div>👥 {debate.participants} players</div>
-                                            <div>⏱️ {debate.duration}</div>
+                                        <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">
+                                            <div className="flex items-center gap-1.5">
+                                                <UsersIcon size={14} strokeWidth={2} className="text-slate-500" />
+                                                <span>{debate.participants} players</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="inline-block">⏱️</span>
+                                                <span>{debate.duration}</span>
+                                            </div>
                                         </div>
                                         <div className="text-xs text-gray-500 mt-2">
                                             Waiting for: {debate.waitingFor}
