@@ -247,6 +247,26 @@ export default function DebateRoomPage() {
     const proArguments = debate.arguments?.filter(arg => arg.side === Side.PRO) || [];
     const conArguments = debate.arguments?.filter(arg => arg.side === Side.CON) || [];
 
+    // Helper to render a point that could be a string, an object with various key names, etc.
+    const colorMap: Record<string, string> = { blue: 'text-blue-300', red: 'text-red-300', purple: 'text-purple-300' };
+    const formatPoint = (p: any, color: string) => {
+        if (typeof p === 'string') return p;
+        if (typeof p !== 'object' || p === null) return String(p);
+        // Try common key names the LLM might use for the title/label
+        const title = p.label || p.title || p.name || p.point || '';
+        // Try common key names for the body/description
+        const body = p.description || p.text || p.detail || p.explanation || p.content || '';
+        if (title && body) {
+            return <><span className={`font-semibold ${colorMap[color] || 'text-slate-200'}`}>{title}:</span> {body}</>;
+        }
+        // If only one field has content, show it
+        if (title) return title;
+        if (body) return body;
+        // Last resort: join all string values from the object
+        const allVals = Object.values(p).filter(v => typeof v === 'string' && v.trim()).join(' — ');
+        return allVals || JSON.stringify(p);
+    };
+
     return (
         <>
             <Header />
@@ -333,11 +353,7 @@ export default function DebateRoomPage() {
                                     <strong className="text-blue-400">PRO points:</strong>
                                     <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
                                         {summaryResult.proPoints.map((p: any, i: number) => (
-                                            <li key={i}>
-                                                {typeof p === 'string' ? p : (
-                                                    <><span className="font-semibold text-blue-300">{p.label}:</span> {p.description}</>
-                                                )}
-                                            </li>
+                                            <li key={i}>{formatPoint(p, 'blue')}</li>
                                         ))}
                                     </ul>
                                 </div>
@@ -347,11 +363,7 @@ export default function DebateRoomPage() {
                                     <strong className="text-red-400">CON points:</strong>
                                     <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
                                         {summaryResult.conPoints.map((p: any, i: number) => (
-                                            <li key={i}>
-                                                {typeof p === 'string' ? p : (
-                                                    <><span className="font-semibold text-red-300">{p.label}:</span> {p.description}</>
-                                                )}
-                                            </li>
+                                            <li key={i}>{formatPoint(p, 'red')}</li>
                                         ))}
                                     </ul>
                                 </div>
@@ -361,11 +373,7 @@ export default function DebateRoomPage() {
                                     <strong className="text-purple-400">Suggested rebuttals:</strong>
                                     <ul className="list-disc pl-5 text-slate-300 mt-1 space-y-1">
                                         {summaryResult.suggestedRebuttals.map((p: any, i: number) => (
-                                            <li key={i}>
-                                                {typeof p === 'string' ? p : (
-                                                    <><span className="font-semibold text-purple-300">{p.label}:</span> {p.description}</>
-                                                )}
-                                            </li>
+                                            <li key={i}>{formatPoint(p, 'purple')}</li>
                                         ))}
                                     </ul>
                                 </div>
