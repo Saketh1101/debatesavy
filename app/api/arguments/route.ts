@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-// Removed Prisma dependency for serverless prototype; returning mock argument.
+import store from '@/lib/memory';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
                 user: { id: userId, name: 'Demo User' },
                 timestamp: new Date().toISOString()
             };
+
+            // Ensure debate exists in store and add argument
+            store.ensureDebateExists(debateId);
+            store.addArgumentToDebate(debateId, arg);
 
             return NextResponse.json(arg, { status: 201 });
         } catch (error) {

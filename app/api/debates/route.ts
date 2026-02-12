@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-// Removed Prisma for serverless prototype; returning in-memory/mock responses.
+import store from '@/lib/memory';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -14,23 +14,9 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const now = new Date().toISOString();
-            const debate = {
-                id: 'debate_' + Math.random().toString(36).substr(2, 9),
-                title,
-                topic,
-                isPublic,
-                mode,
-                status: 'pending',
-                createdAt: now,
-                updatedAt: now,
-                participants: [
-                    { id: userId, name: 'Demo User', image: null }
-                ],
-                _count: { arguments: 0 }
-            };
-
-            return NextResponse.json(debate, { status: 201 });
+            const id = 'debate_' + Math.random().toString(36).substr(2, 9);
+            const created = store.createDebate({ id, title, topic, mode, userId, userName: 'Demo User' });
+            return NextResponse.json(created, { status: 201 });
         } catch (error) {
             console.error('Debate creation error:', error);
             return NextResponse.json(
@@ -43,8 +29,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     return withAuth(request, async (_req, userId) => {
-        // Serverless prototype: return an empty list or a small mock set.
-        const sample = [];
-        return NextResponse.json(sample);
+        const list = store.listDebatesForUser(userId || 'user_demo');
+        return NextResponse.json(list);
     });
 }

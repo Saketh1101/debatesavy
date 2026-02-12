@@ -104,16 +104,21 @@ export default function DebateRoomPage() {
 
     const handleAnalyzeDebate = async () => {
         if (!debate || !token) return;
+        const messages = (debate.arguments || []).map(arg => ({
+            author: arg.user?.name || arg.userId,
+            content: arg.content,
+        }));
+
+        if (messages.length === 0) {
+            setSummaryError('No arguments found to analyze. Add some PRO or CON points first.');
+            return;
+        }
+
         setSummaryLoading(true);
         setSummaryError(null);
         setSummaryResult(null);
 
         try {
-            const messages = (debate.arguments || []).map(arg => ({
-                author: arg.user?.name || arg.userId,
-                content: arg.content,
-            }));
-
             const res = await fetch('/api/ai-assistant/summary', {
                 method: 'POST',
                 headers: {
@@ -243,7 +248,7 @@ export default function DebateRoomPage() {
                             </span>
                             <button
                                 onClick={handleAnalyzeDebate}
-                                disabled={summaryLoading}
+                                disabled={summaryLoading || (debate.arguments?.length || 0) === 0}
                                 className="ml-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm font-semibold disabled:opacity-50"
                             >
                                 {summaryLoading ? 'Analyzing...' : 'Analyze Debate'}
@@ -287,6 +292,14 @@ export default function DebateRoomPage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Error Banner */}
+                    {summaryError && (
+                        <div className="max-w-7xl mx-auto px-4 py-3 bg-red-700/10 border border-red-500/20 text-red-200 rounded-lg mb-4">
+                            <strong className="font-semibold">Error:</strong>
+                            <span className="ml-2">{summaryError}</span>
+                        </div>
+                    )}
 
                     {/* Summary Panel */}
                     {summaryResult && (

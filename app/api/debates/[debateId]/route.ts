@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-// Prisma removed for prototype; returning mock data.
+import store from '@/lib/memory';
 
 export async function GET(
     request: NextRequest,
@@ -9,22 +9,11 @@ export async function GET(
     return withAuth(request, async (req, userId) => {
         try {
             const { debateId } = await params;
-            // Return a mock debate object for the stateless prototype.
-            const now = new Date().toISOString();
-            const debate = {
-                id: debateId,
-                title: 'Demo Debate',
-                topic: 'Demo Topic',
-                status: 'pending',
-                createdAt: now,
-                updatedAt: now,
-                participants: [
-                    { id: userId, name: 'Demo User', rating: 1600 }
-                ],
-                arguments: [],
-                analysis: null
-            };
-
+            store.ensureDebateExists(debateId);
+            const debate = store.getDebate(debateId);
+            if (!debate) {
+                return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
+            }
             return NextResponse.json(debate);
         } catch (error) {
             console.error('Get debate error:', error);
@@ -53,14 +42,13 @@ export async function PATCH(
             }
 
             // Return a mock updated object
-            const updated = {
-                id: debateId,
-                status,
-                startedAt: status === 'active' ? new Date().toISOString() : null,
-                endedAt: status === 'completed' ? new Date().toISOString() : null
-            };
-
-            return NextResponse.json(updated);
+            const d = store.getDebate(debateId);
+            if (!d) return NextResponse.json({ error: 'Debate not found' }, { status: 404 });
+            d.status = status;
+            d.startedAt = status === 'active' ? new Date().toISOString() : undefined;
+            d.endedAt = status === 'completed' ? new Date().toISOString() : undefined;
+            d.updatedAt = new Date().toISOString();
+            return NextResponse.json(d);
         } catch (error) {
             console.error('Update debate error:', error);
             return NextResponse.json(
