@@ -8,8 +8,9 @@ import Button from '@/app/components/Button';
 
 export default function LoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    // Prefill demo credentials for prototype convenience
+    const [email, setEmail] = useState('abhi@gmail.com');
+    const [password, setPassword] = useState('Zxcvbnm@1234');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -48,6 +49,7 @@ export default function LoginPage() {
                         <div className="space-y-2 text-center">
                             <h1 className="text-3xl font-bold">Sign In</h1>
                             <p className="text-slate-400">Welcome back to DebateIQ</p>
+                            <p className="text-xs text-slate-500">Demo account: abhi@gmail.com / Zxcvbnm@1234</p>
                         </div>
 
                         {error && (

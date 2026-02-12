@@ -35,11 +35,6 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/auth/register">
-                  <Button variant="primary" size="lg" className="w-full sm:w-auto">
-                    Start Free Trial
-                  </Button>
-                </Link>
                 <Link href="/auth/login">
                   <Button variant="outline" size="lg" className="w-full sm:w-auto">
                     Sign In

@@ -12,28 +12,24 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Mock user for demo
-        const mockPassword = 'hashed_password_demo';
+        // Only accept a single demo account for the prototype
+        const DEMO_EMAIL = 'abhi@gmail.com';
+        const DEMO_PASSWORD = 'Zxcvbnm@1234';
+
+        if (email !== DEMO_EMAIL || password !== DEMO_PASSWORD) {
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+        }
+
         const user = {
-            id: 'user_1',
-            email,
-            password: mockPassword,
-            name: 'Demo User',
+            id: 'user_demo',
+            email: DEMO_EMAIL,
+            name: 'Abhi Demo',
             rating: 1600,
         };
 
-        // For demo, allow any password
         const token = generateToken(user.id, user.email);
 
-        return NextResponse.json({
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                rating: user.rating,
-            },
-            token,
-        });
+        return NextResponse.json({ user, token });
     } catch (error) {
         console.error('Login error:', error);
         return NextResponse.json(
