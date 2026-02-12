@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
 
 export default function FamousPersonalitiesPage() {
+    const router = useRouter();
     const [selectedPersonality, setSelectedPersonality] = useState<string | null>(null);
     const [debateTopic, setDebateTopic] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/auth/login');
+        }
+    }, [router]);
 
     // Mock famous personalities
     const personalities = [
@@ -73,17 +82,23 @@ export default function FamousPersonalitiesPage() {
             return;
         }
 
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login first');
+            return;
+        }
+
         setIsCreating(true);
         try {
-            const response = await fetch('/api/debates', {
+            const response = await fetch('/api/debates/famous', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
-                    title: `Debate with ${personalities.find(p => p.id === selectedPersonality)?.name}`,
-                    topic: debateTopic,
-                    isPublic: false,
-                    mode: 'famous',
-                    personalityId: selectedPersonality
+                    personalityId: selectedPersonality,
+                    topic: debateTopic
                 })
             });
 

@@ -1,13 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
 
 export default function OnlineDebatesPage() {
+    const router = useRouter();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
     const [isSearching, setIsSearching] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/auth/login');
+        }
+    }, [router]);
 
     const categories = [
         { id: 'tech', label: 'Technology', icon: '💻', color: 'from-blue-500 to-blue-600' },
@@ -62,13 +71,38 @@ export default function OnlineDebatesPage() {
             return;
         }
 
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login first');
+            return;
+        }
+
         setIsSearching(true);
-        // Simulate finding an opponent
-        setTimeout(() => {
-            // In real app, would call API to find match
-            window.location.href = '/debate/online_match_1';
+        try {
+            const response = await fetch('/api/debates/online', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    category: selectedCategory,
+                    difficulty: selectedDifficulty
+                })
+            });
+
+            if (response.ok) {
+                const debate = await response.json();
+                window.location.href = `/debate/${debate.id}`;
+            } else {
+                alert('Failed to find opponent');
+            }
+        } catch (error) {
+            console.error('Error finding opponent:', error);
+            alert('Error finding opponent');
+        } finally {
             setIsSearching(false);
-        }, 2000);
+        }
     };
 
     return (
