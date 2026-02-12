@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import prisma from '@/lib/prisma';
 
 export async function GET(
     request: NextRequest,
@@ -9,26 +10,37 @@ export async function GET(
         try {
             const { debateId } = await params;
 
-            const debate = {
-                id: debateId,
-                title: 'AI Ethics in Modern Society',
-                topic: 'Should AI have rights?',
-                status: 'active',
-                createdAt: new Date(),
-                participants: [
-                    { id: userId, name: 'You', email: 'user@example.com', rating: 1600 }
-                ],
-                arguments: [
-                    {
-                        id: 'arg_1',
-                        content: 'AI should have rights because...',
-                        timestamp: new Date(),
-                        analysis: { id: 'ana_1', score: 8.5 },
-                        user: { id: 'user_1', name: 'Opponent' }
-                    }
-                ],
-                analysis: { id: 'debate_ana_1', overallScore: 7.8 }
-            };
+            const debate = await prisma.debate.findUnique({
+                where: { id: debateId },
+                include: {
+                    participants: {
+                        select: {
+                            id: true,
+                            name: true,
+                            rating: true
+                        }
+                    },
+                    arguments: {
+                        orderBy: { timestamp: 'asc' },
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            }
+                        }
+                    },
+                    analysis: true
+                }
+            });
+
+            if (!debate) {
+                return NextResponse.json(
+                    { error: 'Debate not found' },
+                    { status: 404 }
+                );
+            }
 
             return NextResponse.json(debate);
         } catch (error) {
@@ -57,18 +69,14 @@ export async function PATCH(
                 );
             }
 
-            const updatedDebate = {
-                id: debateId,
-                title: 'AI Ethics in Modern Society',
-                topic: 'Should AI have rights?',
-                status: status,
-                createdAt: new Date(),
-                startedAt: status === 'active' ? new Date() : undefined,
-                endedAt: status === 'completed' ? new Date() : undefined,
-                participants: [],
-                arguments: [],
-                analysis: null,
-            };
+            const updatedDebate = await prisma.debate.update({
+                where: { id: debateId },
+                data: {
+                    status,
+                    startedAt: status === 'active' ? new Date() : undefined,
+                    endedAt: status === 'completed' ? new Date() : undefined
+                }
+            });
 
             return NextResponse.json(updatedDebate);
         } catch (error) {

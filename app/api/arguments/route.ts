@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import prisma from '@/lib/prisma';
+import { Side } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const { debateId, content } = await req.json();
+            const { debateId, content, side } = await req.json();
 
             if (!debateId || !content) {
                 return NextResponse.json(
@@ -13,23 +15,28 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const argument = {
-                id: 'arg_' + Math.random().toString(36).substr(2, 9),
-                debateId,
-                userId,
-                content,
-                timestamp: new Date(),
-                user: {
-                    id: userId,
-                    name: 'You',
+            const argument = await prisma.argument.create({
+                data: {
+                    content,
+                    debateId,
+                    userId,
+                    side: side as Side || Side.NEUTRAL
                 },
-            };
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                }
+            });
 
             return NextResponse.json(argument, { status: 201 });
         } catch (error) {
-            console.error('Argument creation error:', error);
+            console.error('Argument submission error:', error);
             return NextResponse.json(
-                { error: 'Failed to create argument' },
+                { error: 'Failed to submit argument' },
                 { status: 500 }
             );
         }

@@ -1,18 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/app/components/Header';
 import { AiAssistant } from '@/app/components/AiAssistant';
 
+enum Side {
+    PRO = 'PRO',
+    CON = 'CON',
+    NEUTRAL = 'NEUTRAL'
+}
+
 interface Argument {
     id: string;
     userId: string;
-    userName: string;
+    user: {
+        id: string;
+        name: string;
+    };
     content: string;
-    timestamp: Date;
+    timestamp: string | Date; // API returns ISO string
     score?: number;
+    side: Side;
 }
 
 interface DebateParticipant {
@@ -40,9 +50,11 @@ export default function DebateRoomPage() {
 
     const [debate, setDebate] = useState<DebateRoom | null>(null);
     const [argument, setArgument] = useState('');
+    const [selectedSide, setSelectedSide] = useState<Side>(Side.PRO);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
+    const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const savedToken = localStorage.getItem('token');
@@ -52,30 +64,39 @@ export default function DebateRoomPage() {
         }
         setToken(savedToken);
 
-        // Load debate details
-        const loadDebate = async () => {
-            try {
-                const response = await fetch(`/api/debates/${debateId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${savedToken}`,
-                    },
-                });
+        fetchDebate(savedToken);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setDebate(data);
-                } else {
-                    router.push('/dashboard');
-                }
-            } catch (error) {
-                console.error('Error loading debate:', error);
-            } finally {
-                setLoading(false);
-            }
+        // Poll for updates every 3 seconds
+        pollingInterval.current = setInterval(() => {
+            fetchDebate(savedToken, true);
+        }, 3000);
+
+        return () => {
+            if (pollingInterval.current) clearInterval(pollingInterval.current);
         };
-
-        loadDebate();
     }, [debateId, router]);
+
+    const fetchDebate = async (authToken: string, isPolling = false) => {
+        try {
+            const response = await fetch(`/api/debates/${debateId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setDebate(data);
+            } else if (!isPolling) {
+                // Only redirect on initial load failure, not polling glitches
+                router.push('/dashboard');
+            }
+        } catch (error) {
+            console.error('Error loading debate:', error);
+        } finally {
+            if (!isPolling) setLoading(false);
+        }
+    };
 
     const handleSubmitArgument = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -92,6 +113,7 @@ export default function DebateRoomPage() {
                 body: JSON.stringify({
                     debateId,
                     content: argument,
+                    side: selectedSide
                 }),
             });
 
@@ -102,6 +124,8 @@ export default function DebateRoomPage() {
                     arguments: [...(prev.arguments || []), newArg]
                 } : null);
                 setArgument('');
+                // Refresh full state to be sure
+                fetchDebate(token);
             }
         } catch (error) {
             console.error('Error submitting argument:', error);
@@ -132,136 +156,137 @@ export default function DebateRoomPage() {
         );
     }
 
+    const proArguments = debate.arguments?.filter(arg => arg.side === Side.PRO) || [];
+    const conArguments = debate.arguments?.filter(arg => arg.side === Side.CON) || [];
+
     return (
         <>
             <Header />
-            <div className="min-h-screen bg-slate-950">
-                <div className="max-w-6xl mx-auto px-4 py-8">
-                    {/* Back Button */}
-                    <Link href="/dashboard" className="text-blue-400 hover:text-blue-300 mb-6 inline-block">
-                        Back to Dashboard
-                    </Link>
-
-                    {/* Debate Header */}
-                    <div className="bg-slate-900 rounded-xl border border-slate-800 p-8 mb-8">
-                        <div className="flex justify-between items-start mb-4">
-                            <div>
-                                <h1 className="text-3xl font-bold text-white mb-2">{debate.title}</h1>
-                                <p className="text-xl text-slate-300">{debate.topic}</p>
-                            </div>
-                            <span className="bg-blue-600 text-white px-4 py-2 rounded-lg capitalize">
-                                {debate.mode} • {debate.status}
-                            </span>
+            <div className="min-h-screen bg-slate-950 pb-20">
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                            <Link href="/dashboard" className="text-slate-400 hover:text-white mb-2 inline-block text-sm">
+                                ← Back to Dashboard
+                            </Link>
+                            <h1 className="text-2xl md:text-3xl font-bold text-white">{debate.title}</h1>
+                            <p className="text-slate-400 mt-1">{debate.topic}</p>
                         </div>
-
-                        {/* Participants */}
-                        <div className="flex gap-4 flex-wrap">
-                            {debate.participants.map((p) => (
-                                <div key={p.id} className="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-lg">
-                                    <span className="text-sm">{p.name}</span>
-                                    {p.role && <span className="text-xs text-slate-400">({p.role})</span>}
-                                </div>
-                            ))}
+                        <div className="flex items-center gap-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold
+                                ${debate.status === 'active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                                    debate.status === 'completed' ? 'bg-slate-700 text-slate-300' :
+                                        'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'}`}>
+                                {debate.status.toUpperCase()}
+                            </span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Arguments Section */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-slate-900 rounded-xl border border-slate-800 p-8">
-                                <h2 className="text-2xl font-bold text-white mb-6">Debate Arguments</h2>
-
-                                {/* Arguments List */}
-                                <div className="space-y-4 mb-8 max-h-96 overflow-y-auto">
-                                    {debate.arguments && debate.arguments.length > 0 ? (
-                                        debate.arguments.map((arg) => (
-                                            <div key={arg.id} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <p className="font-semibold text-white">{arg.userName}</p>
-                                                    <span className="text-xs text-slate-400">
-                                                        {arg.timestamp instanceof Date
-                                                            ? arg.timestamp.toLocaleTimeString()
-                                                            : new Date(arg.timestamp).toLocaleTimeString()}
-                                                    </span>
-                                                </div>
-                                                <p className="text-slate-300 mb-2">{arg.content}</p>
-                                                {arg.score && (
-                                                    <div className="text-sm text-blue-400">
-                                                        Score: {arg.score.toFixed(1)}/10
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-slate-400 text-center py-8">No arguments yet. Be the first to argue!</p>
-                                    )}
-                                </div>
-
-                                {/* Submit Argument Form */}
-                                <form onSubmit={handleSubmitArgument} className="space-y-4 border-t border-slate-700 pt-6">
-                                    <div>
-                                        <label className="block text-white font-semibold mb-2">Your Argument</label>
-                                        <textarea
-                                            value={argument}
-                                            onChange={(e) => setArgument(e.target.value)}
-                                            placeholder="Share your well-reasoned argument..."
-                                            rows={4}
-                                            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none resize-none"
-                                        />
+                    {/* Split View Arena */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 min-h-[500px]">
+                        {/* PRO Column */}
+                        <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col">
+                            <div className="p-4 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
+                                <h2 className="text-lg font-bold text-blue-400 text-center">PRO (Support)</h2>
+                            </div>
+                            <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
+                                {proArguments.map(arg => (
+                                    <ArgumentCard key={arg.id} arg={arg} color="blue" />
+                                ))}
+                                {proArguments.length === 0 && (
+                                    <div className="text-center text-slate-500 py-10 italic">
+                                        No arguments in support yet.
                                     </div>
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting || !argument.trim()}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                                    >
-                                        {isSubmitting ? 'Submitting...' : 'Submit Argument'}
-                                    </button>
-                                </form>
+                                )}
                             </div>
                         </div>
 
-                        {/* Sidebar - Stats and Info */}
-                        <div className="space-y-6">
-                            {/* Mode Info */}
-                            <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/30 p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">Debate Details</h3>
-                                <div className="space-y-4">
-                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-blue-500">
-                                        <p className="text-xs text-slate-400 mb-1">Debate Format</p>
-                                        <p className="font-semibold text-white capitalize">{debate.mode}</p>
-                                    </div>
-                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-green-500">
-                                        <p className="text-xs text-slate-400 mb-1">Current Status</p>
-                                        <p className="font-semibold text-white capitalize">{debate.status}</p>
-                                    </div>
-                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-purple-500">
-                                        <p className="text-xs text-slate-400 mb-1">Participants</p>
-                                        <p className="font-semibold text-white">{debate.participants.length} People</p>
-                                    </div>
-                                    <div className="p-3 bg-slate-800/50 rounded-lg border-l-3 border-amber-500">
-                                        <p className="text-xs text-slate-400 mb-1">Total Arguments</p>
-                                        <p className="font-semibold text-white">{debate.arguments?.length || 0} Submitted</p>
-                                    </div>
-                                </div>
+                        {/* CON Column */}
+                        <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col">
+                            <div className="p-4 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
+                                <h2 className="text-lg font-bold text-red-400 text-center">CON (Oppose)</h2>
                             </div>
+                            <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
+                                {conArguments.map(arg => (
+                                    <ArgumentCard key={arg.id} arg={arg} color="red" />
+                                ))}
+                                {conArguments.length === 0 && (
+                                    <div className="text-center text-slate-500 py-10 italic">
+                                        No arguments in opposition yet.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
 
-                            {/* AI Insights */}
-                            <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/30 p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">Debate Tips</h3>
-                                <div className="space-y-2 text-slate-300 text-sm">
-                                    <p>• Use evidence to support your claims</p>
-                                    <p>• Address opposing viewpoints directly</p>
-                                    <p>• Keep arguments concise and focused</p>
-                                    <p>• Build on previous arguments</p>
+                    {/* Input Area */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-4 md:p-6 shadow-2xl z-40">
+                        <div className="max-w-4xl mx-auto">
+                            <form onSubmit={handleSubmitArgument} className="space-y-4">
+                                <div className="flex gap-4 mb-2 justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedSide(Side.PRO)}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.PRO
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/50'
+                                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                            }`}
+                                    >
+                                        Support (PRO)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedSide(Side.CON)}
+                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.CON
+                                                ? 'bg-red-600 text-white shadow-lg shadow-red-500/25 ring-2 ring-red-400/50'
+                                                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                                            }`}
+                                    >
+                                        Oppose (CON)
+                                    </button>
                                 </div>
-                            </div>
+                                <div className="flex gap-2">
+                                    <textarea
+                                        value={argument}
+                                        onChange={(e) => setArgument(e.target.value)}
+                                        placeholder={`Type your argument to ${selectedSide === Side.PRO ? 'support' : 'oppose'} the motion...`}
+                                        rows={2}
+                                        className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none resize-none"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting || !argument.trim()}
+                                        className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold px-6 rounded-lg transition-colors"
+                                    >
+                                        {isSubmitting ? 'Sending...' : 'Send'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* AI Assistant */}
-            {token && <AiAssistant debateId={debate.id} debateMode={debate.mode} personalityName={debate.personalityName} />}
+            {token && debate && <AiAssistant debateId={debate.id} debateMode={debate.mode} personalityName={debate.personalityName} />}
         </>
+    );
+}
+
+function ArgumentCard({ arg, color }: { arg: Argument, color: 'blue' | 'red' }) {
+    const borderColor = color === 'blue' ? 'border-blue-500/30' : 'border-red-500/30';
+    const bgColor = color === 'blue' ? 'bg-blue-500/5' : 'bg-red-500/5';
+
+    return (
+        <div className={`p-4 rounded-lg border ${borderColor} ${bgColor} animate-in fade-in slide-in-from-bottom-2`}>
+            <div className="flex justify-between items-start mb-2">
+                <span className="font-semibold text-slate-200 text-sm">{arg.user?.name || 'Unknown User'}</span>
+                <span className="text-xs text-slate-500">
+                    {new Date(arg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+            </div>
+            <p className="text-slate-300 whitespace-pre-wrap text-sm leading-relaxed">{arg.content}</p>
+        </div>
     );
 }

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const { title, topic, isPublic = false } = await req.json();
+            const { title, topic, isPublic = false, mode = 'friendly' } = await req.json();
 
             if (!title || !topic) {
                 return NextResponse.json(
@@ -13,15 +14,27 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const debate = {
-                id: 'debate_' + Math.random().toString(36).substr(2, 9),
-                title,
-                topic,
-                isPublic,
-                status: 'pending',
-                createdAt: new Date(),
-                participants: [{ id: userId, name: 'You' }],
-            };
+            const debate = await prisma.debate.create({
+                data: {
+                    title,
+                    topic,
+                    isPublic,
+                    mode,
+                    status: 'pending',
+                    participants: {
+                        connect: { id: userId }
+                    }
+                },
+                include: {
+                    participants: {
+                        select: {
+                            id: true,
+                            name: true,
+                            image: true
+                        }
+                    }
+                }
+            });
 
             return NextResponse.json(debate, { status: 201 });
         } catch (error) {
@@ -37,16 +50,29 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const debates = [
-                {
-                    id: 'debate_1',
-                    title: 'AI Ethics in Modern Society',
-                    topic: 'Should AI have rights?',
-                    status: 'completed',
-                    createdAt: new Date(),
-                    participants: [{ id: userId, name: 'You' }],
+            const debates = await prisma.debate.findMany({
+                where: {
+                    participants: {
+                        some: {
+                            id: userId
+                        }
+                    }
                 },
-            ];
+                include: {
+                    participants: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    },
+                    _count: {
+                        select: { arguments: true }
+                    }
+                },
+                orderBy: {
+                    updatedAt: 'desc'
+                }
+            });
 
             return NextResponse.json(debates);
         } catch (error) {
