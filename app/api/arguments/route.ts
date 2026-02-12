@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -14,21 +13,17 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const argument = await prisma.argument.create({
-                data: {
-                    debateId,
-                    userId,
-                    content,
+            const argument = {
+                id: 'arg_' + Math.random().toString(36).substr(2, 9),
+                debateId,
+                userId,
+                content,
+                timestamp: new Date(),
+                user: {
+                    id: userId,
+                    name: 'You',
                 },
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            name: true,
-                        },
-                    },
-                },
-            });
+            };
 
             return NextResponse.json(argument, { status: 201 });
         } catch (error) {

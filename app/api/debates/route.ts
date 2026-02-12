@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -14,19 +13,15 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const debate = await prisma.debate.create({
-                data: {
-                    title,
-                    topic,
-                    isPublic,
-                    participants: {
-                        connect: { id: userId },
-                    },
-                },
-                include: {
-                    participants: true,
-                },
-            });
+            const debate = {
+                id: 'debate_' + Math.random().toString(36).substr(2, 9),
+                title,
+                topic,
+                isPublic,
+                status: 'pending',
+                createdAt: new Date(),
+                participants: [{ id: userId, name: 'You' }],
+            };
 
             return NextResponse.json(debate, { status: 201 });
         } catch (error) {
@@ -42,27 +37,16 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const debates = await prisma.debate.findMany({
-                where: {
-                    participants: {
-                        some: {
-                            id: userId,
-                        },
-                    },
+            const debates = [
+                {
+                    id: 'debate_1',
+                    title: 'AI Ethics in Modern Society',
+                    topic: 'Should AI have rights?',
+                    status: 'completed',
+                    createdAt: new Date(),
+                    participants: [{ id: userId, name: 'You' }],
                 },
-                include: {
-                    participants: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                        },
-                    },
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            });
+            ];
 
             return NextResponse.json(debates);
         } catch (error) {

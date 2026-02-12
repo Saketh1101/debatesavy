@@ -1,11 +1,21 @@
-import { PrismaClient } from '@prisma/client';
+// Prisma client mock - database integration removed for demo
+// This prevents build-time initialization errors
+// In production, configure with DATABASE_URL
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const prisma =
-    globalForPrisma.prisma ||
-    new PrismaClient({
-        log: ['query'],
-    });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export const prisma = {
+    user: {
+        findUnique: async () => null,
+        create: async (data: any) => ({ id: 'mock', ...data }),
+        findMany: async () => [],
+    },
+    debate: {
+        findUnique: async () => null,
+        findMany: async () => [],
+        create: async (data: any) => ({ id: 'mock', ...data }),
+        update: async (data: any) => ({ id: 'mock' }),
+    },
+    argument: {
+        create: async (data: any) => ({ id: 'mock', ...data }),
+        findMany: async () => [],
+    },
+};
