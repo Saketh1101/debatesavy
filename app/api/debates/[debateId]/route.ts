@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-import prisma from '@/lib/prisma';
+// Prisma removed for prototype; returning mock data.
 
 export async function GET(
     request: NextRequest,
@@ -9,38 +9,21 @@ export async function GET(
     return withAuth(request, async (req, userId) => {
         try {
             const { debateId } = await params;
-
-            const debate = await prisma.debate.findUnique({
-                where: { id: debateId },
-                include: {
-                    participants: {
-                        select: {
-                            id: true,
-                            name: true,
-                            rating: true
-                        }
-                    },
-                    arguments: {
-                        orderBy: { timestamp: 'asc' },
-                        include: {
-                            user: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            }
-                        }
-                    },
-                    analysis: true
-                }
-            });
-
-            if (!debate) {
-                return NextResponse.json(
-                    { error: 'Debate not found' },
-                    { status: 404 }
-                );
-            }
+            // Return a mock debate object for the stateless prototype.
+            const now = new Date().toISOString();
+            const debate = {
+                id: debateId,
+                title: 'Demo Debate',
+                topic: 'Demo Topic',
+                status: 'pending',
+                createdAt: now,
+                updatedAt: now,
+                participants: [
+                    { id: userId, name: 'Demo User', rating: 1600 }
+                ],
+                arguments: [],
+                analysis: null
+            };
 
             return NextResponse.json(debate);
         } catch (error) {
@@ -69,16 +52,15 @@ export async function PATCH(
                 );
             }
 
-            const updatedDebate = await prisma.debate.update({
-                where: { id: debateId },
-                data: {
-                    status,
-                    startedAt: status === 'active' ? new Date() : undefined,
-                    endedAt: status === 'completed' ? new Date() : undefined
-                }
-            });
+            // Return a mock updated object
+            const updated = {
+                id: debateId,
+                status,
+                startedAt: status === 'active' ? new Date().toISOString() : null,
+                endedAt: status === 'completed' ? new Date().toISOString() : null
+            };
 
-            return NextResponse.json(updatedDebate);
+            return NextResponse.json(updated);
         } catch (error) {
             console.error('Update debate error:', error);
             return NextResponse.json(

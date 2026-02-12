@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^7.4.0",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -19,7 +18,7 @@
     "jsonwebtoken": "^9.0.3",
     "next": "16.1.6",
     "openai": "^6.21.0",
-    "prisma": "^7.4.0",
+    
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "zustand": "^5.0.11"

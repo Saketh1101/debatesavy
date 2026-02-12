@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-import prisma from '@/lib/prisma';
+// Removed Prisma for serverless prototype; returning in-memory/mock responses.
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -14,27 +14,21 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const debate = await prisma.debate.create({
-                data: {
-                    title,
-                    topic,
-                    isPublic,
-                    mode,
-                    status: 'pending',
-                    participants: {
-                        connect: { id: userId }
-                    }
-                },
-                include: {
-                    participants: {
-                        select: {
-                            id: true,
-                            name: true,
-                            image: true
-                        }
-                    }
-                }
-            });
+            const now = new Date().toISOString();
+            const debate = {
+                id: 'debate_' + Math.random().toString(36).substr(2, 9),
+                title,
+                topic,
+                isPublic,
+                mode,
+                status: 'pending',
+                createdAt: now,
+                updatedAt: now,
+                participants: [
+                    { id: userId, name: 'Demo User', image: null }
+                ],
+                _count: { arguments: 0 }
+            };
 
             return NextResponse.json(debate, { status: 201 });
         } catch (error) {
@@ -48,42 +42,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    return withAuth(request, async (req, userId) => {
-        // If no DATABASE_URL is configured, return a safe empty list for prototype/dev machines.
-        if (!process.env.DATABASE_URL) {
-            return NextResponse.json([]);
-        }
-
-        try {
-            const debates = await prisma.debate.findMany({
-                where: {
-                    participants: {
-                        some: {
-                            id: userId
-                        }
-                    }
-                },
-                include: {
-                    participants: {
-                        select: {
-                            id: true,
-                            name: true
-                        }
-                    },
-                    _count: {
-                        select: { arguments: true }
-                    }
-                },
-                orderBy: {
-                    updatedAt: 'desc'
-                }
-            });
-
-            return NextResponse.json(debates);
-        } catch (error) {
-            console.error('Get debates error:', error);
-            // Fallback to empty list instead of a 500 to avoid breaking client pages on machines without DB.
-            return NextResponse.json([]);
-        }
+    return withAuth(request, async (_req, userId) => {
+        // Serverless prototype: return an empty list or a small mock set.
+        const sample = [];
+        return NextResponse.json(sample);
     });
 }

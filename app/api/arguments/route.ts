@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
-import prisma from '@/lib/prisma';
-import { Side } from '@prisma/client';
+// Removed Prisma dependency for serverless prototype; returning mock argument.
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -15,24 +14,17 @@ export async function POST(request: NextRequest) {
                 );
             }
 
-            const argument = await prisma.argument.create({
-                data: {
-                    content,
-                    debateId,
-                    userId,
-                    side: side as Side || Side.NEUTRAL
-                },
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            name: true
-                        }
-                    }
-                }
-            });
+            const arg = {
+                id: 'arg_' + Math.random().toString(36).substr(2, 9),
+                content,
+                debateId,
+                userId,
+                side: side || 'NEUTRAL',
+                user: { id: userId, name: 'Demo User' },
+                timestamp: new Date().toISOString()
+            };
 
-            return NextResponse.json(argument, { status: 201 });
+            return NextResponse.json(arg, { status: 201 });
         } catch (error) {
             console.error('Argument submission error:', error);
             return NextResponse.json(
