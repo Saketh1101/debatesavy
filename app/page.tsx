@@ -40,19 +40,15 @@ export default function Home() {
                 </p>
                 <ul className="space-y-3 text-slate-300">
                   <li className="flex items-start gap-3">
-                    <span className="text-blue-400 font-bold mt-1">✓</span>
                     <span>Real-time argument analysis powered by AI</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-blue-400 font-bold mt-1">✓</span>
                     <span>ELO-based rating system for fair competition</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-blue-400 font-bold mt-1">✓</span>
                     <span>Detailed post-debate analytics and insights</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="text-blue-400 font-bold mt-1">✓</span>
                     <span>Public and private debate modes</span>
                   </li>
                 </ul>

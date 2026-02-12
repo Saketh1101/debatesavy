@@ -139,7 +139,7 @@ export default function DebateRoomPage() {
                 <div className="max-w-6xl mx-auto px-4 py-8">
                     {/* Back Button */}
                     <Link href="/dashboard" className="text-blue-400 hover:text-blue-300 mb-6 inline-block">
-                        ← Back to Dashboard
+                        Back to Dashboard
                     </Link>
 
                     {/* Debate Header */}

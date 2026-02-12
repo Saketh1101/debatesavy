@@ -83,7 +83,7 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
                             className="text-white hover:text-blue-100 transition-colors p-1 hover:bg-white/10 rounded text-lg font-bold"
                             title="Close"
                         >
-                            ✕
+                            ×
                         </button>
                     </div>
 

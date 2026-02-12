@@ -106,7 +106,7 @@ export default function FamousPersonalitiesPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <Link href="/modes" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
-                        ← Back to Modes
+                        Back to Modes
                     </Link>
                     <h1 className="text-4xl font-bold text-white mb-2">Famous Personalities</h1>
                     <p className="text-gray-400">Debate against AI representations of legendary thinkers and scientists</p>

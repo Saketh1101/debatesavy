@@ -94,7 +94,7 @@ export default function ModesPage() {
 
                                     {/* CTA Button */}
                                     <button className={`w-full bg-gradient-to-r ${mode.color} text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all duration-300`}>
-                                        Get Started →
+                                        Get Started
                                     </button>
                                 </div>
                             </div>

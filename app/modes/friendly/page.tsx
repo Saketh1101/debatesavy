@@ -67,7 +67,7 @@ export default function FriendlyDebatePage() {
                 {/* Header */}
                 <div className="mb-8">
                     <Link href="/modes" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
-                        ← Back to Modes
+                        Back to Modes
                     </Link>
                     <h1 className="text-4xl font-bold text-white mb-2">Friendly Debate</h1>
                     <p className="text-gray-400">Debate with friends or colleagues on topics you care about</p>
@@ -113,7 +113,7 @@ export default function FriendlyDebatePage() {
                                         className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded transition-all hover:scale-110 active:scale-95 text-xl"
                                         title="Decrease participants"
                                     >
-                                        −
+                                        -
                                     </button>
                                     <div className="text-5xl font-bold text-blue-400 w-20 text-center">
                                         {numPersons}
@@ -157,11 +157,9 @@ export default function FriendlyDebatePage() {
                                 <span>2-4 people works best for good pacing</span>
                             </li>
                             <li className="flex gap-2">
-                                <span className="text-green-400">✓</span>
                                 <span>AI assistant will provide feedback</span>
                             </li>
                             <li className="flex gap-2">
-                                <span className="text-green-400">✓</span>
                                 <span>Share the room code with friends</span>
                             </li>
                         </ul>

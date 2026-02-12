@@ -113,7 +113,7 @@ export default function OnlineDebatesPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <Link href="/modes" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
-                        ← Back to Modes
+                        Back to Modes
                     </Link>
                     <h1 className="text-4xl font-bold text-white mb-2">Online Debates</h1>
                     <p className="text-gray-400">Join live debates with players worldwide. Get matched with opponents based on your interests and skill level.</p>
