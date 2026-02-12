@@ -179,8 +179,8 @@ export default function DebateRoomPage() {
                                                 <div className="flex justify-between items-start mb-2">
                                                     <p className="font-semibold text-white">{arg.userName}</p>
                                                     <span className="text-xs text-slate-400">
-                                                        {arg.timestamp instanceof Date 
-                                                            ? arg.timestamp.toLocaleTimeString() 
+                                                        {arg.timestamp instanceof Date
+                                                            ? arg.timestamp.toLocaleTimeString()
                                                             : new Date(arg.timestamp).toLocaleTimeString()}
                                                     </span>
                                                 </div>

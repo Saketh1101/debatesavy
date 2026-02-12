@@ -92,7 +92,7 @@ export default function FamousPersonalitiesPage() {
         try {
             const response = await fetch('/api/debates/famous', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },

@@ -35,7 +35,7 @@ export default function FriendlyDebatePage() {
         try {
             const response = await fetch('/api/debates/friendly', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
