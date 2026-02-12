@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
         throw lastErr;
       }
 
-      const requestBody = JSON.stringify({ model: OLLAMA_MODEL, prompt, max_tokens: 512 });
+      const requestBody = JSON.stringify({ model: OLLAMA_MODEL, prompt, max_tokens: 512, stream: false });
       let text: string;
       try {
         text = await fetchWithRetry(`${OLLAMA_URL}/api/generate`, {

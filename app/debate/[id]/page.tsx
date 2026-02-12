@@ -174,38 +174,10 @@ export default function DebateRoomPage() {
             const data = await res.json();
             setSummaryResult(data.result);
 
-            // Push concise summary into AI Assistant chat with a link marker
-                try {
-                    const r = data.result;
-                    let short = '';
-                    if (r) {
-                        if (r.summary) short = r.summary;
-                        else if (Array.isArray(r.proPoints) || Array.isArray(r.conPoints)) {
-                            const p = (r.proPoints || []).slice(0,2).join('; ');
-                            const c = (r.conPoints || []).slice(0,2).join('; ');
-                            short = [p && `PRO: ${p}`, c && `CON: ${c}`].filter(Boolean).join(' — ');
-                        } else if (r.raw) {
-                            // Don't push raw streaming JSON into chat; show a friendly hint instead
-                            short = 'Full analysis available. Click to view the full analysis in the page.';
-                        }
-                    }
-                    if (!short) short = 'Debate analysis generated.';
-                    if (aiRef.current && aiRef.current.addMessage) {
-                        try {
-                            const fullStr = JSON.stringify(data.result || {});
-                            const encoded = typeof window !== 'undefined' && window.btoa ? window.btoa(fullStr) : Buffer.from(fullStr).toString('base64');
-                            const payload = `${short}\n\n__VIEW_FULL_ANALYSIS__\n__FULL_ANALYSIS__:${encoded}`;
-                            aiRef.current.addMessage({ role: 'assistant', content: payload });
-                            aiRef.current.open && aiRef.current.open();
-                        } catch (e) {
-                            // fallback to previous behavior
-                            aiRef.current.addMessage({ role: 'assistant', content: `${short}\n\n__VIEW_FULL_ANALYSIS__` });
-                            aiRef.current.open && aiRef.current.open();
-                        }
-                    }
-                } catch (e) {
-                    console.warn('Could not push summary to chat', e);
-                }
+            // Scroll to the summary panel so user sees it immediately
+            setTimeout(() => {
+                document.getElementById('debate-summary')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         } catch (err: any) {
             console.error('Analyze error:', err);
             setSummaryError(err?.message || 'Failed to analyze debate');
