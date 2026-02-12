@@ -247,7 +247,7 @@ export default function DebateRoomPage() {
 
                             {/* AI Insights */}
                             <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-xl border border-yellow-500/30 p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">💡 Debate Tips</h3>
+                                <h3 className="text-lg font-bold text-white mb-4">Debate Tips</h3>
                                 <div className="space-y-2 text-slate-300 text-sm">
                                     <p>• Use evidence to support your claims</p>
                                     <p>• Address opposing viewpoints directly</p>

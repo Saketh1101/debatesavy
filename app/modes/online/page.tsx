@@ -19,14 +19,14 @@ export default function OnlineDebatesPage() {
     }, [router]);
 
     const categories = [
-        { id: 'tech', label: 'Technology', emoji: '💻', color: 'from-blue-500 to-blue-600' },
-        { id: 'politics', label: 'Politics', emoji: '🏛️', color: 'from-red-500 to-red-600' },
-        { id: 'science', label: 'Science', emoji: '🔬', color: 'from-green-500 to-green-600' },
-        { id: 'sports', label: 'Sports', emoji: '⚽', color: 'from-yellow-500 to-yellow-600' },
-        { id: 'entertainment', label: 'Entertainment', emoji: '🎬', color: 'from-pink-500 to-pink-600' },
-        { id: 'philosophy', label: 'Philosophy', emoji: '💭', color: 'from-purple-500 to-purple-600' },
-        { id: 'economics', label: 'Economics', emoji: '💰', color: 'from-amber-500 to-amber-600' },
-        { id: 'environment', label: 'Environment', emoji: '🌍', color: 'from-teal-500 to-teal-600' },
+        { id: 'tech', label: 'Technology', color: 'from-blue-500 to-blue-600' },
+        { id: 'politics', label: 'Politics', color: 'from-red-500 to-red-600' },
+        { id: 'science', label: 'Science', color: 'from-green-500 to-green-600' },
+        { id: 'sports', label: 'Sports', color: 'from-yellow-500 to-yellow-600' },
+        { id: 'entertainment', label: 'Entertainment', color: 'from-pink-500 to-pink-600' },
+        { id: 'philosophy', label: 'Philosophy', color: 'from-purple-500 to-purple-600' },
+        { id: 'economics', label: 'Economics', color: 'from-amber-500 to-amber-600' },
+        { id: 'environment', label: 'Environment', color: 'from-teal-500 to-teal-600' },
     ];
 
     const difficulties = [
@@ -135,7 +135,6 @@ export default function OnlineDebatesPage() {
                                             : 'border-slate-700 bg-slate-800 hover:border-blue-400 hover:bg-slate-750'
                                             }`}
                                     >
-                                        <div className="text-4xl mb-2">{cat.emoji}</div>
                                         <div className={`font-semibold text-lg transition-colors duration-300 ${selectedCategory === cat.id ? 'text-blue-300' : 'text-white'}`}>{cat.label}</div>
                                     </button>
                                 ))}
@@ -201,12 +200,10 @@ export default function OnlineDebatesPage() {
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 text-xs text-gray-400">
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-sm">👥</span>
-                                                <span>{debate.participants} players</span>
+                                                <span>Players: {debate.participants}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="inline-block">⏱️</span>
-                                                <span>{debate.duration}</span>
+                                                <span>Duration: {debate.duration}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-gray-500 mt-2">

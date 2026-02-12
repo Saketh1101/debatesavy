@@ -142,7 +142,7 @@ export default function FriendlyDebatePage() {
 
                     {/* Side Panel - Tips */}
                     <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30 p-6 h-fit">
-                        <h3 className="text-xl font-bold text-white mb-4">💡 Tips for Great Debates</h3>
+                        <h3 className="text-xl font-bold text-white mb-4">Tips for Great Debates</h3>
                         <ul className="space-y-3 text-gray-300 text-sm">
                             <li className="flex gap-2">
                                 <span className="text-green-400">✓</span>
@@ -166,7 +166,6 @@ export default function FriendlyDebatePage() {
 
                         <div className="mt-6 pt-6 border-t border-slate-700">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-xl">🤖</span>
                                 <h4 className="text-white font-semibold">AI Assistant</h4>
                             </div>
                             <p className="text-gray-400 text-sm">

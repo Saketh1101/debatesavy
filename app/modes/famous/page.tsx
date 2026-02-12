@@ -27,7 +27,6 @@ export default function FamousPersonalitiesPage() {
             description: 'Pioneer of black hole physics and cosmology',
             argumentStyle: 'Scientific rigor, explains complex ideas simply',
             keyBeliefs: 'Universe operates by physical laws',
-            image: '🌌'
         },
         {
             id: 'marquess',
@@ -36,7 +35,6 @@ export default function FamousPersonalitiesPage() {
             description: 'Influential thinker and political theorist',
             argumentStyle: 'Eloquent, philosophical, references classical knowledge',
             keyBeliefs: 'Society requires structure and intellectual discourse',
-            image: '👑'
         },
         {
             id: 'shakespeare',
@@ -45,7 +43,6 @@ export default function FamousPersonalitiesPage() {
             description: 'Master of human nature and dramatic expression',
             argumentStyle: 'Poetic, uses literary examples, explores human psychology',
             keyBeliefs: 'All the world is a stage; human nature is complex and multifaceted',
-            image: '🎭'
         },
         {
             id: 'abraham_lincoln',
@@ -54,7 +51,6 @@ export default function FamousPersonalitiesPage() {
             description: 'Preserver of the American Union and advocate for freedom',
             argumentStyle: 'Humble yet persuasive, uses historical examples and moral reasoning',
             keyBeliefs: 'Liberty and equality are fundamental rights of all people',
-            image: '🎩'
         }
     ];
 
@@ -124,14 +120,9 @@ export default function FamousPersonalitiesPage() {
                                     : 'border-slate-700 bg-slate-900 hover:border-slate-600'
                                     }`}
                             >
-                                <div className="flex gap-4">
-                                    <div className="text-4xl">{personality.image}</div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-white">{personality.name}</h3>
-                                        <p className="text-blue-400 text-sm">{personality.title}</p>
-                                        <p className="text-gray-400 text-sm mt-2">{personality.description}</p>
-                                    </div>
-                                </div>
+                                <h3 className="text-xl font-bold text-white">{personality.name}</h3>
+                                <p className="text-blue-400 text-sm">{personality.title}</p>
+                                <p className="text-gray-400 text-sm mt-2">{personality.description}</p>
                             </div>
                         ))}
                     </div>
@@ -139,7 +130,6 @@ export default function FamousPersonalitiesPage() {
                     {/* Personality Details */}
                     {selectedPersonalityData && (
                         <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-lg border border-blue-500 p-6 h-fit sticky top-4">
-                            <div className="text-6xl text-center mb-4">{selectedPersonalityData.image}</div>
                             <h3 className="text-2xl font-bold text-white text-center mb-2">{selectedPersonalityData.name}</h3>
                             <p className="text-blue-400 text-center text-sm mb-4">{selectedPersonalityData.title}</p>
 

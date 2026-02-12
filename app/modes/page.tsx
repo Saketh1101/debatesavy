@@ -107,7 +107,7 @@ export default function ModesPage() {
                     <h3 className="text-2xl font-bold text-white mb-8">Every Mode Includes</h3>
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="p-6 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 hover:border-blue-500/60 transition-all duration-300">
-                            <h4 className="text-lg font-bold text-blue-300 mb-3">🤖 Intelligent AI Assistant</h4>
+                            <h4 className="text-lg font-bold text-blue-300 mb-3">Intelligent AI Assistant</h4>
                             <p className="text-gray-300">Real-time feedback and smart suggestions to strengthen your arguments and counter points effectively.</p>
                         </div>
                         <div className="p-6 rounded-lg bg-gradient-to-br from-emerald-500/10 to-emerald-600/10 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300">
@@ -115,7 +115,7 @@ export default function ModesPage() {
                             <p className="text-gray-300">Track your performance metrics, win rates, argument quality scores, and skill progression over time.</p>
                         </div>
                         <div className="p-6 rounded-lg bg-gradient-to-br from-violet-500/10 to-violet-600/10 border border-violet-500/30 hover:border-violet-500/60 transition-all duration-300">
-                            <h4 className="text-lg font-bold text-violet-300 mb-3">💬 Pure Text Focus</h4>
+                            <h4 className="text-lg font-bold text-violet-300 mb-3">Pure Text Focus</h4>
                             <p className="text-gray-300">No distractions—just intelligent debate. Emphasis on your arguments, reasoning, and debate excellence.</p>
                         </div>
                     </div>

@@ -63,10 +63,10 @@ export function AiAssistant({ debateId, debateMode, personalityName }: AiAssista
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40 group text-2xl font-bold"
+                className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-40 group text-lg font-bold"
                 title="Open AI Assistant"
             >
-                🤖
+                AI
             </button>
 
             {/* Chat Panel */}

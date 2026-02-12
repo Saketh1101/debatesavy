@@ -102,7 +102,6 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700 hover:border-blue-500 transition">
               <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">💬</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Debate</h3>
               <p className="text-slate-400">Create or join a debate room. Share your arguments in real-time with your opponent.</p>
@@ -110,7 +109,6 @@ export default function Home() {
 
             <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700 hover:border-blue-500 transition">
               <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                <span className="text-2xl">🤖</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">AI Analysis</h3>
               <p className="text-slate-400">Our AI analyzes each argument across multiple dimensions for objective feedback.</p>
