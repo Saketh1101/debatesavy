@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import store from '@/lib/memory';
 
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
@@ -15,30 +16,27 @@ export async function POST(request: NextRequest) {
 
             const debateId = 'debate_' + Math.random().toString(36).substr(2, 9);
 
-            // Create friendly debate with mock participants
-            const debate = {
+            // Create and store the debate in memory
+            const debate = store.createDebate({
                 id: debateId,
                 title,
                 topic,
                 mode: 'friendly',
-                numPersons,
-                status: 'pending',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                participants: [
-                    { id: userId, name: 'You', role: 'creator' },
-                    ...Array.from({ length: numPersons - 1 }, (_, i) => ({
-                        id: `bot_${i + 1}`,
-                        name: `Bot ${i + 1}`,
-                        role: 'participant',
-                        isAI: true,
-                    }))
-                ],
-                arguments: [],
-                analysis: null,
-                maxParticipants: numPersons,
-                isPublic: false,
-            };
+                userId,
+                userName: 'You'
+            });
+
+            // Add additional bot participants to the created debate
+            const storedDebate = store.getDebate(debateId);
+            if (storedDebate && numPersons > 1) {
+                // Add bot participants
+                for (let i = 1; i < numPersons; i++) {
+                    storedDebate.participants.push({
+                        id: `bot_${i}`,
+                        name: `Bot ${i}`
+                    });
+                }
+            }
 
             return NextResponse.json(debate, { status: 201 });
         } catch (error) {
@@ -54,21 +52,11 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            // Return mock friendly debates
-            const debates = [
-                {
-                    id: 'debate_friendly_1',
-                    title: 'Is AI good for society?',
-                    topic: 'Artificial Intelligence',
-                    mode: 'friendly',
-                    numPersons: 3,
-                    status: 'completed',
-                    createdAt: new Date(),
-                    participants: 3,
-                }
-            ];
+            // Return friendly debates from memory store
+            const allDebates = store.listDebatesForUser(userId);
+            const friendlyDebates = allDebates.filter(debate => debate.mode === 'friendly');
 
-            return NextResponse.json(debates);
+            return NextResponse.json(friendlyDebates);
         } catch (error) {
             console.error('Friendly debates fetch error:', error);
             return NextResponse.json(

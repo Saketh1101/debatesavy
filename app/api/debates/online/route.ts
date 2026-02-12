@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import store from '@/lib/memory';
 
 // Mock online debate pool
 const debateCategories = [
@@ -61,40 +62,50 @@ export async function POST(request: NextRequest) {
             );
 
             if (matchedDebate) {
-                // Join existing debate
-                const debate = {
+                // Join existing debate - in reality, we'd need to handle this differently
+                // For now, we'll create a new debate with the matched participant
+                const debate = store.createDebate({
                     id: matchedDebate.id,
                     title: matchedDebate.title,
                     topic: matchedDebate.title,
                     mode: 'online',
-                    category,
-                    difficulty,
-                    status: 'active',
-                    createdAt: new Date(),
-                    participants: [
-                        { id: userId, name: 'You', joinedAt: new Date() },
-                        { id: 'opponent_' + Math.random().toString(36).substr(2, 6), name: 'Opponent', joinedAt: new Date(Date.now() - 60000) },
-                    ],
-                    matchCode: matchedDebate.id,
-                };
+                    userId,
+                    userName: 'You'
+                });
+
+                // Add opponent to the debate
+                const storedDebate = store.getDebate(matchedDebate.id);
+                if (storedDebate) {
+                    storedDebate.participants.push({
+                        id: 'opponent_' + Math.random().toString(36).substr(2, 6),
+                        name: 'Opponent'
+                    });
+                    (storedDebate as any).category = category;
+                    (storedDebate as any).difficulty = difficulty;
+                    (storedDebate as any).status = 'active';
+                }
+
                 return NextResponse.json(debate, { status: 200 });
             } else {
                 // Create new debate room
                 const newDebateId = 'debate_' + Math.random().toString(36).substr(2, 9);
-                const debate = {
+                const debate = store.createDebate({
                     id: newDebateId,
                     title: `${category.charAt(0).toUpperCase() + category.slice(1)} Debate (${difficulty})`,
                     topic: `Debate on ${category}`,
                     mode: 'online',
-                    category,
-                    difficulty,
-                    status: 'waiting_for_opponent',
-                    createdAt: new Date(),
-                    participants: [
-                        { id: userId, name: 'You', joinedAt: new Date() },
-                    ],
-                    matchCode: newDebateId,
-                };
+                    userId,
+                    userName: 'You'
+                });
+
+                // Add additional metadata
+                const storedDebate = store.getDebate(newDebateId);
+                if (storedDebate) {
+                    (storedDebate as any).category = category;
+                    (storedDebate as any).difficulty = difficulty;
+                    (storedDebate as any).status = 'waiting_for_opponent';
+                }
+
                 return NextResponse.json(debate, { status: 201 });
             }
         } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
+import store from '@/lib/memory';
 
 // Mock famous personalities database
 const famousPersonalities = [
@@ -63,24 +64,27 @@ export async function POST(request: NextRequest) {
 
             const debateId = 'debate_' + Math.random().toString(36).substr(2, 9);
 
-            const debate = {
+            // Create and store the debate in memory
+            const debate = store.createDebate({
                 id: debateId,
                 title: `Debate with ${personality.name}`,
                 topic,
                 mode: 'famous',
-                personalityId,
-                personality,
-                status: 'active',
-                createdAt: new Date(),
-                participants: [
-                    { id: userId, name: 'You', role: 'user' },
-                    { id: personality.id, name: personality.name, role: 'personality', isAI: true },
-                ],
-                arguments: [],
-                analysis: null,
-                maxParticipants: 2,
-                isPublic: false,
-            };
+                userId,
+                userName: 'You'
+            });
+
+            // Add the famous personality as a participant
+            const storedDebate = store.getDebate(debateId);
+            if (storedDebate) {
+                storedDebate.participants.push({
+                    id: personality.id,
+                    name: personality.name
+                });
+                // Store additional personality data for frontend
+                (storedDebate as any).personalityId = personalityId;
+                (storedDebate as any).personality = personality;
+            }
 
             return NextResponse.json(debate, { status: 201 });
         } catch (error) {
