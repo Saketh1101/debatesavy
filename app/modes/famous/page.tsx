@@ -21,33 +21,6 @@ export default function FamousPersonalitiesPage() {
     // Mock famous personalities
     const personalities = [
         {
-            id: 'alan_turing',
-            name: 'Alan Turing',
-            title: 'Computer Scientist & Mathematician',
-            description: 'Pioneer of theoretical computer science and AI',
-            argumentStyle: 'Logical, mathematical, probes assumptions deeply',
-            keyBeliefs: 'Believes in the possibility of machine intelligence',
-            image: '🧠'
-        },
-        {
-            id: 'marie_curie',
-            name: 'Marie Curie',
-            title: 'Physicist & Chemist',
-            description: 'Pioneer of radioactivity research',
-            argumentStyle: 'Evidence-based, persistent, challenges conventional wisdom',
-            keyBeliefs: 'Science transcends gender and borders',
-            image: '⚛️'
-        },
-        {
-            id: 'socrates',
-            name: 'Socrates',
-            title: 'Philosopher',
-            description: 'Ancient Greek philosopher who pioneered the Socratic method',
-            argumentStyle: 'Questions assumptions, uses dialogue to find truth',
-            keyBeliefs: 'True knowledge comes from self-examination',
-            image: '🏛️'
-        },
-        {
             id: 'stephen_hawking',
             name: 'Stephen Hawking',
             title: 'Theoretical Physicist',
@@ -57,22 +30,31 @@ export default function FamousPersonalitiesPage() {
             image: '🌌'
         },
         {
-            id: 'aristotle',
-            name: 'Aristotle',
-            title: 'Philosopher',
-            description: 'Ancient Greek philosopher and polymath',
-            argumentStyle: 'Systematic, categorical, seeks the golden mean',
-            keyBeliefs: 'Virtue lies between extremes',
-            image: '📚'
+            id: 'marquess',
+            name: 'Marquess',
+            title: 'Nobleman & Philosopher',
+            description: 'Influential thinker and political theorist',
+            argumentStyle: 'Eloquent, philosophical, references classical knowledge',
+            keyBeliefs: 'Society requires structure and intellectual discourse',
+            image: '👑'
         },
         {
-            id: 'jane_goodall',
-            name: 'Jane Goodall',
-            title: 'Primatologist & Conservationist',
-            description: 'Pioneered the study of wild chimpanzees',
-            argumentStyle: 'Observation-based, compassionate, patient',
-            keyBeliefs: 'All creatures deserve dignity and respect',
-            image: '🐵'
+            id: 'shakespeare',
+            name: 'William Shakespeare',
+            title: 'Playwright & Poet',
+            description: 'Master of human nature and dramatic expression',
+            argumentStyle: 'Poetic, uses literary examples, explores human psychology',
+            keyBeliefs: 'All the world is a stage; human nature is complex and multifaceted',
+            image: '🎭'
+        },
+        {
+            id: 'abraham_lincoln',
+            name: 'Abraham Lincoln',
+            title: 'Political Leader & Statesman',
+            description: 'Preserver of the American Union and advocate for freedom',
+            argumentStyle: 'Humble yet persuasive, uses historical examples and moral reasoning',
+            keyBeliefs: 'Liberty and equality are fundamental rights of all people',
+            image: '🎩'
         }
     ];
 

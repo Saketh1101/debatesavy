@@ -4,33 +4,6 @@ import { withAuth } from '@/lib/auth/middleware';
 // Mock famous personalities database
 const famousPersonalities = [
     {
-        id: 'alan_turing',
-        name: 'Alan Turing',
-        title: 'Computer Scientist & Mathematician',
-        description: 'Pioneer of theoretical computer science and AI',
-        argumentStyle: 'Logical, mathematical, probes assumptions deeply',
-        keyBeliefs: 'Believes in the possibility of machine intelligence',
-        background: 'Turing was a brilliant mathematician who helped crack the Enigma code and pioneered computer science.',
-    },
-    {
-        id: 'marie_curie',
-        name: 'Marie Curie',
-        title: 'Physicist & Chemist',
-        description: 'Pioneer of radioactivity research',
-        argumentStyle: 'Evidence-based, persistent, challenges conventional wisdom',
-        keyBeliefs: 'Science transcends gender and borders',
-        background: 'First woman to win Nobel Prize, conducted pioneering research on radioactivity.',
-    },
-    {
-        id: 'socrates',
-        name: 'Socrates',
-        title: 'Philosopher',
-        description: 'Ancient Greek philosopher who pioneered the Socratic method',
-        argumentStyle: 'Questions assumptions, uses dialogue to find truth',
-        keyBeliefs: 'True knowledge comes from self-examination',
-        background: 'Ancient Greek philosopher known for his method of inquiry and wisdom.',
-    },
-    {
         id: 'stephen_hawking',
         name: 'Stephen Hawking',
         title: 'Theoretical Physicist',
@@ -38,6 +11,33 @@ const famousPersonalities = [
         argumentStyle: 'Scientific rigor, explains complex ideas simply',
         keyBeliefs: 'Universe operates by physical laws',
         background: 'Renowned cosmologist who made groundbreaking discoveries about black holes.',
+    },
+    {
+        id: 'marquess',
+        name: 'Marquess',
+        title: 'Nobleman & Philosopher',
+        description: 'Influential thinker and political theorist',
+        argumentStyle: 'Eloquent, philosophical, references classical knowledge',
+        keyBeliefs: 'Society requires structure and intellectual discourse',
+        background: 'A distinguished nobleman known for philosophical inquiry and political thought.',
+    },
+    {
+        id: 'shakespeare',
+        name: 'William Shakespeare',
+        title: 'Playwright & Poet',
+        description: 'Master of human nature and dramatic expression',
+        argumentStyle: 'Poetic, uses literary examples, explores human psychology',
+        keyBeliefs: 'All the world is a stage; human nature is complex and multifaceted',
+        background: 'Greatest playwright in the English language, renowned for exploring the depths of human emotion and society.',
+    },
+    {
+        id: 'abraham_lincoln',
+        name: 'Abraham Lincoln',
+        title: 'Political Leader & Statesman',
+        description: 'Preserver of the American Union and advocate for freedom',
+        argumentStyle: 'Humble yet persuasive, uses historical examples and moral reasoning',
+        keyBeliefs: 'Liberty and equality are fundamental rights of all people',
+        background: 'American president who led the nation through the Civil War and championed the abolition of slavery.',
     },
 ];
 
