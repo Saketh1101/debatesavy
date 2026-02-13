@@ -313,7 +313,7 @@ export default function SplitViewDebatePage() {
                         <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col h-[calc(100vh-250px)]">
                             {/* Header */}
                             <div className="p-3 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-blue-400">User 1 (Demo)</h2>
+                                <h2 className="text-lg font-bold text-blue-400">{debate.participants?.[0]?.name || 'User 1'}</h2>
                             </div>
 
                             {/* Arguments List */}
@@ -375,7 +375,7 @@ export default function SplitViewDebatePage() {
                         <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col h-[calc(100vh-250px)]">
                             {/* Header */}
                             <div className="p-3 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-red-400">User 2 (Demo)</h2>
+                                <h2 className="text-lg font-bold text-red-400">{debate.participants?.[1]?.name || 'User 2'}</h2>
                             </div>
 
                             {/* Arguments List */}

@@ -29,16 +29,16 @@ export async function POST(request: NextRequest) {
             // Add participants with provided names
             const storedDebate = store.getDebate(debateId);
             if (storedDebate && numPersons > 1) {
-                // Add participants with their provided names
-                for (let i = 1; i < numPersons; i++) {
+                // Add participants with their provided names (starting from 0)
+                for (let i = 0; i < numPersons; i++) {
                     // Use provided name or fallback to generic name
                     const participantName = participantNames && participantNames[i]
                         ? participantNames[i].trim()
-                        : `Participant ${i}`;
+                        : `Participant ${i + 1}`;
 
                     storedDebate.participants.push({
                         id: `participant_${i}`,
-                        name: participantName || `Participant ${i}`
+                        name: participantName || `Participant ${i + 1}`
                     });
                 }
             }

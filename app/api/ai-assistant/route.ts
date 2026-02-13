@@ -133,16 +133,37 @@ Suggestion: <one specific, practical improvement in one sentence>`;
                 throw e;
             }
 
-            // Parse response (attempt JSON, fallback to raw text)
+            // Parse response - Ollama streams JSON lines
             let assistantMessage = '';
             try {
-                const parsed = JSON.parse(text);
-                // if model returned structured content, try to extract a text field
-                assistantMessage = parsed.response || parsed.text || JSON.stringify(parsed);
+                // Split by newlines to get individual JSON objects
+                const lines = text.trim().split('\n');
+                let fullResponse = '';
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const obj = JSON.parse(line);
+                        if (obj.response) {
+                            fullResponse += obj.response;
+                        }
+                        if (obj.done === true) {
+                            break;
+                        }
+                    } catch (e) {
+                        // Skip lines that aren't valid JSON
+                        continue;
+                    }
+                }
+
+                assistantMessage = fullResponse.trim();
+                if (!assistantMessage) {
+                    assistantMessage = 'I could not generate a response. Please try again.';
+                }
             } catch (e) {
-                assistantMessage = text || 'I could not generate a response. Please try again.';
+                assistantMessage = 'Failed to parse AI response.';
             }
-            console.log('[AI-ASSISTANT] Success:', assistantMessage.substring(0, 100));
+            console.log('[AI-ASSISTANT] Success:', assistantMessage.substring(0, 150));
             console.log('[AI-ASSISTANT] Full response length:', assistantMessage.length);
 
             return NextResponse.json({
