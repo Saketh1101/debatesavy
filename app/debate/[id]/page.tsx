@@ -344,6 +344,14 @@ export default function DebateRoomPage() {
                                         'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'}`}>
                                 {debate.status.toUpperCase()}
                             </span>
+                            {isFriendlyMode && (
+                                <Link
+                                    href={`/debate/${debateId}/split-view`}
+                                    className="bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 rounded text-sm font-semibold transition-colors"
+                                >
+                                    📺 Split View
+                                </Link>
+                            )}
                             <button
                                 onClick={handleAnalyzeDebate}
                                 disabled={summaryLoading || (debate.arguments?.length || 0) === 0}

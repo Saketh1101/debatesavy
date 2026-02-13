@@ -5,7 +5,7 @@ import store from '@/lib/memory';
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const { numPersons, title, topic } = await req.json();
+            const { numPersons, title, topic, participantNames } = await req.json();
 
             if (!numPersons || !title || !topic || numPersons < 2) {
                 return NextResponse.json(
@@ -26,14 +26,19 @@ export async function POST(request: NextRequest) {
                 userName: 'You'
             });
 
-            // Add additional bot participants to the created debate
+            // Add participants with provided names
             const storedDebate = store.getDebate(debateId);
             if (storedDebate && numPersons > 1) {
-                // Add bot participants
+                // Add participants with their provided names
                 for (let i = 1; i < numPersons; i++) {
+                    // Use provided name or fallback to generic name
+                    const participantName = participantNames && participantNames[i]
+                        ? participantNames[i].trim()
+                        : `Participant ${i}`;
+
                     storedDebate.participants.push({
-                        id: `bot_${i}`,
-                        name: `Bot ${i}`
+                        id: `participant_${i}`,
+                        name: participantName || `Participant ${i}`
                     });
                 }
             }

@@ -10,6 +10,7 @@ export default function FriendlyDebatePage() {
     const [numPersons, setNumPersons] = useState(2);
     const [debateTitle, setDebateTitle] = useState('');
     const [debateTopic, setDebateTopic] = useState('');
+    const [participantNames, setParticipantNames] = useState<string[]>(['', '']); // Track participant names
     const [isCreating, setIsCreating] = useState(false);
 
     useEffect(() => {
@@ -22,6 +23,13 @@ export default function FriendlyDebatePage() {
     const handleCreateDebate = async () => {
         if (!debateTitle || !debateTopic || numPersons < 2) {
             alert('Please fill in all fields');
+            return;
+        }
+
+        // Validate that at least one participant has a name
+        const hasAtLeastOneName = participantNames.some(name => name.trim() !== '');
+        if (!hasAtLeastOneName) {
+            alert('Please enter at least one participant name');
             return;
         }
 
@@ -42,7 +50,8 @@ export default function FriendlyDebatePage() {
                 body: JSON.stringify({
                     numPersons,
                     title: debateTitle,
-                    topic: debateTopic
+                    topic: debateTopic,
+                    participantNames: participantNames.slice(0, numPersons) // Send only the relevant names
                 })
             });
 
@@ -64,6 +73,24 @@ export default function FriendlyDebatePage() {
         } finally {
             setIsCreating(false);
         }
+    };
+
+    // Update participant names when number changes
+    const handleNumPersonsChange = (newNum: number) => {
+        setNumPersons(newNum);
+        // Adjust names array to match new participant count
+        const newNames = [...participantNames];
+        while (newNames.length < newNum) {
+            newNames.push('');
+        }
+        setParticipantNames(newNames.slice(0, newNum));
+    };
+
+    // Update individual participant name
+    const handleNameChange = (index: number, name: string) => {
+        const newNames = [...participantNames];
+        newNames[index] = name;
+        setParticipantNames(newNames);
     };
 
     return (
@@ -116,7 +143,7 @@ export default function FriendlyDebatePage() {
                                 <label className="block text-white font-semibold mb-4">Number of Participants</label>
                                 <div className="flex items-center gap-6">
                                     <button
-                                        onClick={() => setNumPersons(Math.max(2, numPersons - 1))}
+                                        onClick={() => handleNumPersonsChange(Math.max(2, numPersons - 1))}
                                         className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded transition-all hover:scale-110 active:scale-95 text-xl"
                                         title="Decrease participants"
                                     >
@@ -126,7 +153,7 @@ export default function FriendlyDebatePage() {
                                         {numPersons}
                                     </div>
                                     <button
-                                        onClick={() => setNumPersons(Math.min(8, numPersons + 1))}
+                                        onClick={() => handleNumPersonsChange(Math.min(8, numPersons + 1))}
                                         className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded transition-all hover:scale-110 active:scale-95 text-xl"
                                         title="Increase participants"
                                     >
@@ -134,6 +161,24 @@ export default function FriendlyDebatePage() {
                                     </button>
                                 </div>
                                 <p className="text-gray-400 text-sm mt-4">Between 2 and 8 participants (including you)</p>
+                            </div>
+
+                            {/* Participant Names */}
+                            <div className="mb-8">
+                                <label className="block text-white font-semibold mb-4">Participant Names</label>
+                                <div className="space-y-3 bg-slate-900/30 p-4 rounded-lg border border-slate-700/30">
+                                    {Array.from({ length: numPersons }).map((_, index) => (
+                                        <input
+                                            key={index}
+                                            type="text"
+                                            value={participantNames[index] || ''}
+                                            onChange={(e) => handleNameChange(index, e.target.value)}
+                                            placeholder={`Participant ${index + 1} name (e.g., Alice)`}
+                                            className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition text-sm"
+                                        />
+                                    ))}
+                                    <p className="text-gray-500 text-xs mt-2">💡 At least one name is required</p>
+                                </div>
                             </div>
 
                             {/* Create Button */}

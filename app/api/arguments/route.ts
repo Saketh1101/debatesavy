@@ -5,7 +5,7 @@ import store from '@/lib/memory';
 export async function POST(request: NextRequest) {
     return withAuth(request, async (req, userId) => {
         try {
-            const { debateId, content, side } = await req.json();
+            const { debateId, content, side, demoUser } = await req.json();
 
             if (!debateId || !content) {
                 return NextResponse.json(
@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
                 userId,
                 side: side || 'NEUTRAL',
                 user: { id: userId, name: 'Demo User' },
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                demoUser: demoUser || undefined // Track which demo user submitted this (for split-view)
             };
 
             // Ensure debate exists in store and add argument
