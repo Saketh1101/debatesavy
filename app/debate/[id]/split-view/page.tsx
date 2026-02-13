@@ -16,6 +16,70 @@ interface Argument {
     timestamp: string | Date;
 }
 
+// Component to format AI feedback with proper structure
+function FeedbackFormatter({ feedback }: { feedback: string }) {
+    const parts = feedback.split(/\n(?=Summary:|Strengths:|Weaknesses|Suggestion:)/);
+
+    return (
+        <div className="space-y-3 text-xs">
+            {parts.map((part, idx) => {
+                const trimmed = part.trim();
+                if (!trimmed) return null;
+
+                if (trimmed.startsWith('Summary:')) {
+                    return (
+                        <div key={idx} className="pb-2 border-b border-slate-600/30">
+                            <span className="font-bold text-blue-300">Summary:</span>
+                            <p className="text-slate-300 mt-1">{trimmed.replace('Summary:', '').trim()}</p>
+                        </div>
+                    );
+                }
+
+                if (trimmed.startsWith('Strengths:')) {
+                    const content = trimmed.replace('Strengths:', '').trim();
+                    const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
+                    return (
+                        <div key={idx} className="pb-2 border-b border-slate-600/30">
+                            <span className="font-bold text-green-300">Strengths:</span>
+                            <ul className="mt-1 space-y-1 text-slate-300 ml-2">
+                                {bullets.map((bullet, i) => (
+                                    <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                }
+
+                if (trimmed.startsWith('Weaknesses')) {
+                    const content = trimmed.replace('Weaknesses / Counterpoints:', '').replace('Weaknesses / CounterPoints:', '').trim();
+                    const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
+                    return (
+                        <div key={idx} className="pb-2 border-b border-slate-600/30">
+                            <span className="font-bold text-yellow-300">Weaknesses / Counterpoints:</span>
+                            <ul className="mt-1 space-y-1 text-slate-300 ml-2">
+                                {bullets.map((bullet, i) => (
+                                    <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                }
+
+                if (trimmed.startsWith('Suggestion:')) {
+                    return (
+                        <div key={idx}>
+                            <span className="font-bold text-purple-300">Suggestion:</span>
+                            <p className="text-slate-300 mt-1">{trimmed.replace('Suggestion:', '').trim()}</p>
+                        </div>
+                    );
+                }
+
+                return null;
+            })}
+        </div>
+    );
+}
+
 export default function SplitViewDebatePage() {
     const router = useRouter();
     const params = useParams();
@@ -240,10 +304,10 @@ export default function SplitViewDebatePage() {
                             {/* Feedback Section */}
                             {user1Feedback && (
                                 <div className="p-3 border-t border-blue-500/20 bg-slate-800/50">
-                                    <h3 className="font-bold text-blue-300 mb-2 text-sm">AI Feedback</h3>
-                                    <p className="text-slate-300 whitespace-pre-wrap text-xs leading-relaxed max-h-[150px] overflow-y-auto">
-                                        {user1Feedback}
-                                    </p>
+                                    <h3 className="font-bold text-blue-300 mb-3 text-sm">AI Feedback</h3>
+                                    <div className="max-h-[200px] overflow-y-auto">
+                                        <FeedbackFormatter feedback={user1Feedback} />
+                                    </div>
                                 </div>
                             )}
 
@@ -302,10 +366,10 @@ export default function SplitViewDebatePage() {
                             {/* Feedback Section */}
                             {user2Feedback && (
                                 <div className="p-3 border-t border-red-500/20 bg-slate-800/50">
-                                    <h3 className="font-bold text-red-300 mb-2 text-sm">AI Feedback</h3>
-                                    <p className="text-slate-300 whitespace-pre-wrap text-xs leading-relaxed max-h-[150px] overflow-y-auto">
-                                        {user2Feedback}
-                                    </p>
+                                    <h3 className="font-bold text-red-300 mb-3 text-sm">AI Feedback</h3>
+                                    <div className="max-h-[200px] overflow-y-auto">
+                                        <FeedbackFormatter feedback={user2Feedback} />
+                                    </div>
                                 </div>
                             )}
 
