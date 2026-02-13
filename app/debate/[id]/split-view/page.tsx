@@ -18,64 +18,79 @@ interface Argument {
 
 // Component to format AI feedback with proper structure
 function FeedbackFormatter({ feedback }: { feedback: string }) {
+    if (!feedback || feedback.trim().length === 0) {
+        return <p className="text-slate-400 text-xs">No feedback received</p>;
+    }
+
     const parts = feedback.split(/\n(?=Summary:|Strengths:|Weaknesses|Suggestion:)/);
+
+    const rendered = parts.map((part, idx) => {
+        const trimmed = part.trim();
+        if (!trimmed) return null;
+
+        if (trimmed.startsWith('Summary:')) {
+            return (
+                <div key={idx} className="pb-2 border-b border-slate-600/30">
+                    <span className="font-bold text-blue-300">Summary:</span>
+                    <p className="text-slate-300 mt-1">{trimmed.replace('Summary:', '').trim()}</p>
+                </div>
+            );
+        }
+
+        if (trimmed.startsWith('Strengths:')) {
+            const content = trimmed.replace('Strengths:', '').trim();
+            const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
+            return (
+                <div key={idx} className="pb-2 border-b border-slate-600/30">
+                    <span className="font-bold text-green-300">Strengths:</span>
+                    <ul className="mt-1 space-y-1 text-slate-300 ml-2">
+                        {bullets.map((bullet, i) => (
+                            <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        if (trimmed.startsWith('Weaknesses')) {
+            const content = trimmed.replace('Weaknesses / Counterpoints:', '').replace('Weaknesses / CounterPoints:', '').trim();
+            const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
+            return (
+                <div key={idx} className="pb-2 border-b border-slate-600/30">
+                    <span className="font-bold text-yellow-300">Weaknesses / Counterpoints:</span>
+                    <ul className="mt-1 space-y-1 text-slate-300 ml-2">
+                        {bullets.map((bullet, i) => (
+                            <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        if (trimmed.startsWith('Suggestion:')) {
+            return (
+                <div key={idx}>
+                    <span className="font-bold text-purple-300">Suggestion:</span>
+                    <p className="text-slate-300 mt-1">{trimmed.replace('Suggestion:', '').trim()}</p>
+                </div>
+            );
+        }
+
+        return null;
+    }).filter(Boolean);
+
+    // If no formatted sections found, show raw feedback
+    if (rendered.length === 0) {
+        return (
+            <div className="text-slate-300 text-xs whitespace-pre-wrap bg-slate-950/50 p-2 rounded border border-slate-700">
+                {feedback}
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-3 text-xs">
-            {parts.map((part, idx) => {
-                const trimmed = part.trim();
-                if (!trimmed) return null;
-
-                if (trimmed.startsWith('Summary:')) {
-                    return (
-                        <div key={idx} className="pb-2 border-b border-slate-600/30">
-                            <span className="font-bold text-blue-300">Summary:</span>
-                            <p className="text-slate-300 mt-1">{trimmed.replace('Summary:', '').trim()}</p>
-                        </div>
-                    );
-                }
-
-                if (trimmed.startsWith('Strengths:')) {
-                    const content = trimmed.replace('Strengths:', '').trim();
-                    const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
-                    return (
-                        <div key={idx} className="pb-2 border-b border-slate-600/30">
-                            <span className="font-bold text-green-300">Strengths:</span>
-                            <ul className="mt-1 space-y-1 text-slate-300 ml-2">
-                                {bullets.map((bullet, i) => (
-                                    <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    );
-                }
-
-                if (trimmed.startsWith('Weaknesses')) {
-                    const content = trimmed.replace('Weaknesses / Counterpoints:', '').replace('Weaknesses / CounterPoints:', '').trim();
-                    const bullets = content.split('\n').filter(line => line.trim().startsWith('*'));
-                    return (
-                        <div key={idx} className="pb-2 border-b border-slate-600/30">
-                            <span className="font-bold text-yellow-300">Weaknesses / Counterpoints:</span>
-                            <ul className="mt-1 space-y-1 text-slate-300 ml-2">
-                                {bullets.map((bullet, i) => (
-                                    <li key={i} className="list-disc">{bullet.replace('*', '').trim()}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    );
-                }
-
-                if (trimmed.startsWith('Suggestion:')) {
-                    return (
-                        <div key={idx}>
-                            <span className="font-bold text-purple-300">Suggestion:</span>
-                            <p className="text-slate-300 mt-1">{trimmed.replace('Suggestion:', '').trim()}</p>
-                        </div>
-                    );
-                }
-
-                return null;
-            })}
+            {rendered}
         </div>
     );
 }
@@ -219,6 +234,8 @@ export default function SplitViewDebatePage() {
                 }),
             });
 
+            console.log('[getFeedback] Response status:', res.status);
+
             if (!res.ok) {
                 const txt = await res.text();
                 console.error('[getFeedback] API error:', res.status, txt);
@@ -226,201 +243,163 @@ export default function SplitViewDebatePage() {
             }
 
             const data = await res.json();
-            console.log('[getFeedback] Response received:', data.response?.substring(0, 50));
-
-            if (isUser1) {
-                setUser1Feedback(data.response);
-            } else {
-                setUser2Feedback(data.response);
-            }
-        } catch (err: any) {
-            console.error('[getFeedback] Error:', err);
-            setError(err?.message || 'Failed to get feedback');
-        } finally {
-            setFeedbackLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
+            console.log('[getFeedback] Full response data:', data);
+            console.log('[getFeedback] Response text length:', data.response?.length);
+            console.log('[getFeedback] First 200 chars:', data.response?.substring(0, 200));
             <>
                 <Header />
-                <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                    <p className="text-slate-400">Loading debate...</p>
-                </div>
-            </>
-        );
-    }
-
-    if (!debate) {
-        return (
-            <>
-                <Header />
-                <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                    <p className="text-slate-400">Debate not found</p>
-                </div>
-            </>
-        );
-    }
-
-    const user1Args = debate.arguments?.filter((arg: any) => arg.demoUser === 'user1') || [];
-    const user2Args = debate.arguments?.filter((arg: any) => arg.demoUser === 'user2') || [];
-
-    return (
-        <>
-            <Header />
-            <div className="min-h-screen bg-slate-950">
-                <div className="max-w-full mx-auto px-2 py-4">
-                    {/* Header */}
-                    <div className="mb-4">
-                        <Link href={`/debate/${debateId}`} className="text-blue-400 hover:text-blue-300 text-sm mb-2 inline-block">
-                            ← Back to Normal View
-                        </Link>
-                        <h1 className="text-3xl font-bold text-white">{debate.title}</h1>
-                        <p className="text-slate-400">{debate.topic}</p>
-                    </div>
-
-                    {/* Error Banner */}
-                    {error && (
-                        <div className="max-w-full mx-auto px-2 py-3 bg-red-700/10 border border-red-500/20 text-red-200 rounded-lg mb-4">
-                            <strong>Error:</strong>
-                            <span className="ml-2">{error}</span>
+                <div className="min-h-screen bg-slate-950">
+                    <div className="max-w-full mx-auto px-2 py-4">
+                        {/* Header */}
+                        <div className="mb-4">
+                            <Link href={`/debate/${debateId}`} className="text-blue-400 hover:text-blue-300 text-sm mb-2 inline-block">
+                                ← Back to Normal View
+                            </Link>
+                            <h1 className="text-3xl font-bold text-white">{debate.title}</h1>
+                            <p className="text-slate-400">{debate.topic}</p>
                         </div>
-                    )}
 
-                    {/* Split View Container */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                        {/* USER 1 - LEFT SIDE */}
-                        <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col h-[calc(100vh-250px)]">
-                            {/* Header */}
-                            <div className="p-3 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-blue-400">User 1 (Demo)</h2>
+                        {/* Error Banner */}
+                        {error && (
+                            <div className="max-w-full mx-auto px-2 py-3 bg-red-700/10 border border-red-500/20 text-red-200 rounded-lg mb-4">
+                                <strong>Error:</strong>
+                                <span className="ml-2">{error}</span>
                             </div>
+                        )}
 
-                            {/* Arguments List */}
-                            <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-                                {user1Args.map((arg: any) => (
-                                    <div key={arg.id} className="p-3 rounded-lg border border-blue-500/30 bg-blue-500/5">
-                                        <span className="text-xs text-slate-500">
-                                            {new Date(arg.timestamp).toLocaleTimeString()}
-                                        </span>
-                                        <p className="text-slate-300 text-sm mt-1">{arg.content}</p>
-                                    </div>
-                                ))}
-                                {user1Args.length === 0 && (
-                                    <div className="text-center text-slate-500 text-sm italic py-8">
-                                        No arguments yet
+                        {/* Split View Container */}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            {/* USER 1 - LEFT SIDE */}
+                            <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col h-[calc(100vh-250px)]">
+                                {/* Header */}
+                                <div className="p-3 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
+                                    <h2 className="text-lg font-bold text-blue-400">User 1 (Demo)</h2>
+                                </div>
+
+                                {/* Arguments List */}
+                                <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+                                    {user1Args.map((arg: any) => (
+                                        <div key={arg.id} className="p-3 rounded-lg border border-blue-500/30 bg-blue-500/5">
+                                            <span className="text-xs text-slate-500">
+                                                {new Date(arg.timestamp).toLocaleTimeString()}
+                                            </span>
+                                            <p className="text-slate-300 text-sm mt-1">{arg.content}</p>
+                                        </div>
+                                    ))}
+                                    {user1Args.length === 0 && (
+                                        <div className="text-center text-slate-500 text-sm italic py-8">
+                                            No arguments yet
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Feedback Section */}
+                                {user1Feedback && (
+                                    <div className="p-3 border-t border-blue-500/20 bg-slate-800/50">
+                                        <h3 className="font-bold text-blue-300 mb-3 text-sm">AI Feedback</h3>
+                                        <div className="max-h-[200px] overflow-y-auto">
+                                            <FeedbackFormatter feedback={user1Feedback} />
+                                        </div>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Feedback Section */}
-                            {user1Feedback && (
-                                <div className="p-3 border-t border-blue-500/20 bg-slate-800/50">
-                                    <h3 className="font-bold text-blue-300 mb-3 text-sm">AI Feedback</h3>
-                                    <div className="max-h-[200px] overflow-y-auto">
-                                        <FeedbackFormatter feedback={user1Feedback} />
+                                {/* Input Area */}
+                                <div className="p-3 border-t border-blue-500/20 bg-slate-900">
+                                    <textarea
+                                        value={user1Arg}
+                                        onChange={(e) => setUser1Arg(e.target.value)}
+                                        placeholder="Type User 1 argument..."
+                                        rows={2}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none resize-none mb-2"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => submitArgument(user1Arg, 'user1', setUser1Loading)}
+                                            disabled={user1Loading || !user1Arg.trim()}
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
+                                        >
+                                            {user1Loading ? 'Sending...' : 'Send'}
+                                        </button>
+                                        <button
+                                            onClick={() => getFeedback('user1', true)}
+                                            disabled={user1Loading || user1Args.length === 0}
+                                            className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
+                                        >
+                                            {user1Loading ? 'Analyzing...' : 'Get Feedback'}
+                                        </button>
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
-                            {/* Input Area */}
-                            <div className="p-3 border-t border-blue-500/20 bg-slate-900">
-                                <textarea
-                                    value={user1Arg}
-                                    onChange={(e) => setUser1Arg(e.target.value)}
-                                    placeholder="Type User 1 argument..."
-                                    rows={2}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm placeholder-slate-500 focus:border-blue-500 focus:outline-none resize-none mb-2"
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => submitArgument(user1Arg, 'user1', setUser1Loading)}
-                                        disabled={user1Loading || !user1Arg.trim()}
-                                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
-                                    >
-                                        {user1Loading ? 'Sending...' : 'Send'}
-                                    </button>
-                                    <button
-                                        onClick={() => getFeedback('user1', true)}
-                                        disabled={user1Loading || user1Args.length === 0}
-                                        className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
-                                    >
-                                        {user1Loading ? 'Analyzing...' : 'Get Feedback'}
-                                    </button>
+                            {/* USER 2 - RIGHT SIDE */}
+                            <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col h-[calc(100vh-250px)]">
+                                {/* Header */}
+                                <div className="p-3 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
+                                    <h2 className="text-lg font-bold text-red-400">User 2 (Demo)</h2>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* USER 2 - RIGHT SIDE */}
-                        <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col h-[calc(100vh-250px)]">
-                            {/* Header */}
-                            <div className="p-3 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-red-400">User 2 (Demo)</h2>
-                            </div>
+                                {/* Arguments List */}
+                                <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+                                    {user2Args.map((arg: any) => (
+                                        <div key={arg.id} className="p-3 rounded-lg border border-red-500/30 bg-red-500/5">
+                                            <span className="text-xs text-slate-500">
+                                                {new Date(arg.timestamp).toLocaleTimeString()}
+                                            </span>
+                                            <p className="text-slate-300 text-sm mt-1">{arg.content}</p>
+                                        </div>
+                                    ))}
+                                    {user2Args.length === 0 && (
+                                        <div className="text-center text-slate-500 text-sm italic py-8">
+                                            No arguments yet
+                                        </div>
+                                    )}
+                                </div>
 
-                            {/* Arguments List */}
-                            <div className="flex-1 p-3 space-y-3 overflow-y-auto">
-                                {user2Args.map((arg: any) => (
-                                    <div key={arg.id} className="p-3 rounded-lg border border-red-500/30 bg-red-500/5">
-                                        <span className="text-xs text-slate-500">
-                                            {new Date(arg.timestamp).toLocaleTimeString()}
-                                        </span>
-                                        <p className="text-slate-300 text-sm mt-1">{arg.content}</p>
-                                    </div>
-                                ))}
-                                {user2Args.length === 0 && (
-                                    <div className="text-center text-slate-500 text-sm italic py-8">
-                                        No arguments yet
+                                {/* Feedback Section */}
+                                {user2Feedback && (
+                                    <div className="p-3 border-t border-red-500/20 bg-slate-800/50">
+                                        <h3 className="font-bold text-red-300 mb-3 text-sm">AI Feedback</h3>
+                                        <div className="max-h-[200px] overflow-y-auto">
+                                            <FeedbackFormatter feedback={user2Feedback} />
+                                        </div>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Feedback Section */}
-                            {user2Feedback && (
-                                <div className="p-3 border-t border-red-500/20 bg-slate-800/50">
-                                    <h3 className="font-bold text-red-300 mb-3 text-sm">AI Feedback</h3>
-                                    <div className="max-h-[200px] overflow-y-auto">
-                                        <FeedbackFormatter feedback={user2Feedback} />
+                                {/* Input Area */}
+                                <div className="p-3 border-t border-red-500/20 bg-slate-900">
+                                    <textarea
+                                        value={user2Arg}
+                                        onChange={(e) => setUser2Arg(e.target.value)}
+                                        placeholder="Type User 2 argument..."
+                                        rows={2}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm placeholder-slate-500 focus:border-red-500 focus:outline-none resize-none mb-2"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => submitArgument(user2Arg, 'user2', setUser2Loading)}
+                                            disabled={user2Loading || !user2Arg.trim()}
+                                            className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
+                                        >
+                                            {user2Loading ? 'Sending...' : 'Send'}
+                                        </button>
+                                        <button
+                                            onClick={() => getFeedback('user2', false)}
+                                            disabled={user2Loading || user2Args.length === 0}
+                                            className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
+                                        >
+                                            {user2Loading ? 'Analyzing...' : 'Get Feedback'}
+                                        </button>
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Input Area */}
-                            <div className="p-3 border-t border-red-500/20 bg-slate-900">
-                                <textarea
-                                    value={user2Arg}
-                                    onChange={(e) => setUser2Arg(e.target.value)}
-                                    placeholder="Type User 2 argument..."
-                                    rows={2}
-                                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-white text-sm placeholder-slate-500 focus:border-red-500 focus:outline-none resize-none mb-2"
-                                />
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => submitArgument(user2Arg, 'user2', setUser2Loading)}
-                                        disabled={user2Loading || !user2Arg.trim()}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
-                                    >
-                                        {user2Loading ? 'Sending...' : 'Send'}
-                                    </button>
-                                    <button
-                                        onClick={() => getFeedback('user2', false)}
-                                        disabled={user2Loading || user2Args.length === 0}
-                                        className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-semibold px-3 py-2 rounded text-sm transition-colors"
-                                    >
-                                        {user2Loading ? 'Analyzing...' : 'Get Feedback'}
-                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Legend */}
-                    <div className="max-w-full mx-auto px-2 py-2 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 text-xs text-center">
-                        💡 Manage both users from one screen! Type arguments for User 1 (left) and User 2 (right), then click "Get Feedback" to see AI analysis.
+                        {/* Legend */}
+                        <div className="max-w-full mx-auto px-2 py-2 bg-slate-900/30 border border-slate-700 rounded-lg text-slate-400 text-xs text-center">
+                            💡 Manage both users from one screen! Type arguments for User 1 (left) and User 2 (right), then click "Get Feedback" to see AI analysis.
+                        </div>
                     </div>
                 </div>
-            </div>
-        </>
+            </>
     );
 }

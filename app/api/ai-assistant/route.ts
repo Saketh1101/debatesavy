@@ -142,7 +142,8 @@ Suggestion: <one specific, practical improvement in one sentence>`;
             } catch (e) {
                 assistantMessage = text || 'I could not generate a response. Please try again.';
             }
-            console.log('[AI-ASSISTANT] Success:', assistantMessage.substring(0, 50));
+            console.log('[AI-ASSISTANT] Success:', assistantMessage.substring(0, 100));
+            console.log('[AI-ASSISTANT] Full response length:', assistantMessage.length);
 
             return NextResponse.json({
                 success: true,
