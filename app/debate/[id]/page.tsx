@@ -57,6 +57,8 @@ export default function DebateRoomPage() {
     const [summaryLoading, setSummaryLoading] = useState(false);
     const [summaryResult, setSummaryResult] = useState<any>(null);
     const [summaryError, setSummaryError] = useState<string | null>(null);
+    const [userFeedback, setUserFeedback] = useState<Record<string, any>>({}); // userId -> feedback
+    const [loadingUserId, setLoadingUserId] = useState<string | null>(null); // Track which user's feedback is loading
     const pollingInterval = useRef<NodeJS.Timeout | null>(null);
     const aiRef = useRef<any>(null);
 
@@ -186,6 +188,51 @@ export default function DebateRoomPage() {
         }
     };
 
+    const handleGetUserFeedback = async (userId: string, userName: string) => {
+        if (!debate || !token) return;
+
+        const userArguments = debate.arguments?.filter(arg => arg.userId === userId) || [];
+        if (userArguments.length === 0) return;
+
+        setLoadingUserId(userId);
+        setSummaryError(null);
+
+        try {
+            // Combine all of this user's arguments into a single message
+            const userArgumentsText = userArguments.map(arg => arg.content).join('\n\n');
+
+            const res = await fetch('/api/ai-assistant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    message: userArgumentsText,
+                    context: 'friendly-debate',
+                    debateId,
+                    debateTopic: debate.topic
+                }),
+            });
+
+            if (!res.ok) {
+                const txt = await res.text();
+                throw new Error(txt || 'Feedback API error');
+            }
+
+            const data = await res.json();
+            setUserFeedback(prev => ({
+                ...prev,
+                [userId]: data.response
+            }));
+        } catch (err: any) {
+            console.error('Feedback error:', err);
+            setSummaryError(`Error getting feedback for ${userName}: ${err?.message || 'Unknown error'}`);
+        } finally {
+            setLoadingUserId(null);
+        }
+    };
+
     const handleSubmitArgument = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!argument.trim() || !token) return;
@@ -201,7 +248,7 @@ export default function DebateRoomPage() {
                 body: JSON.stringify({
                     debateId,
                     content: argument,
-                    side: selectedSide
+                    side: debate?.mode === 'friendly' ? 'NEUTRAL' : selectedSide
                 }),
             });
 
@@ -244,8 +291,17 @@ export default function DebateRoomPage() {
         );
     }
 
+    const isFriendlyMode = debate.mode === 'friendly';
     const proArguments = debate.arguments?.filter(arg => arg.side === Side.PRO) || [];
     const conArguments = debate.arguments?.filter(arg => arg.side === Side.CON) || [];
+
+    // Group arguments by user for friendly debate display
+    const argumentsByUser = isFriendlyMode ?
+        debate.arguments?.reduce((acc: Record<string, Argument[]>, arg) => {
+            if (!acc[arg.userId]) acc[arg.userId] = [];
+            acc[arg.userId].push(arg);
+            return acc;
+        }, {}) || {} : {};
 
     // Helper to render a point that could be a string, an object with various key names, etc.
     const colorMap: Record<string, string> = { blue: 'text-blue-300', red: 'text-red-300', purple: 'text-purple-300' };
@@ -298,42 +354,92 @@ export default function DebateRoomPage() {
                         </div>
                     </div>
 
-                    {/* Split View Arena */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 min-h-[500px]">
-                        {/* PRO Column */}
-                        <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col">
-                            <div className="p-4 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-blue-400 text-center">PRO (Support)</h2>
-                            </div>
-                            <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
-                                {proArguments.map(arg => (
-                                    <ArgumentCard key={arg.id} arg={arg} color="blue" />
-                                ))}
-                                {proArguments.length === 0 && (
-                                    <div className="text-center text-slate-500 py-10 italic">
-                                        No arguments in support yet.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                    {/* Debate Arena - Conditional rendering based on mode */}
+                    {isFriendlyMode ? (
+                        /* Friendly Debate: Group by User */
+                        <div className="space-y-6 mb-8">
+                            {Object.entries(argumentsByUser).map(([userId, userArgs]) => {
+                                const user = userArgs[0]?.user;
+                                const feedback = userFeedback[userId];
+                                return (
+                                    <div key={userId} className="bg-slate-900/50 rounded-xl border border-purple-500/20 overflow-hidden">
+                                        <div className="p-4 border-b border-purple-500/20 bg-purple-500/5">
+                                            <div className="flex justify-between items-center">
+                                                <h2 className="text-lg font-bold text-purple-400">{user?.name || 'Unknown User'}</h2>
+                                                <button
+                                                    onClick={() => handleGetUserFeedback(userId, user?.name || 'User')}
+                                                    disabled={loadingUserId === userId}
+                                                    className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-3 py-1 rounded text-sm font-semibold transition-colors"
+                                                >
+                                                    {loadingUserId === userId ? 'Analyzing...' : 'Get Feedback'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 space-y-4">
+                                            {/* User's Arguments */}
+                                            <div className="space-y-3">
+                                                {userArgs.map(arg => (
+                                                    <ArgumentCard key={arg.id} arg={arg} color="purple" />
+                                                ))}
+                                            </div>
 
-                        {/* CON Column */}
-                        <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col">
-                            <div className="p-4 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
-                                <h2 className="text-lg font-bold text-red-400 text-center">CON (Oppose)</h2>
-                            </div>
-                            <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
-                                {conArguments.map(arg => (
-                                    <ArgumentCard key={arg.id} arg={arg} color="red" />
-                                ))}
-                                {conArguments.length === 0 && (
-                                    <div className="text-center text-slate-500 py-10 italic">
-                                        No arguments in opposition yet.
+                                            {/* User's Individual Feedback */}
+                                            {feedback && (
+                                                <div className="mt-4 p-4 bg-slate-800/50 border border-purple-500/30 rounded-lg">
+                                                    <h3 className="font-bold text-purple-300 mb-3">AI Feedback for {user?.name}</h3>
+                                                    <div className="text-slate-300 whitespace-pre-wrap text-sm leading-relaxed">
+                                                        {feedback}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
+                                );
+                            })}
+                            {Object.entries(argumentsByUser).length === 0 && (
+                                <div className="text-center text-slate-500 py-16 italic bg-slate-900/50 rounded-xl border border-slate-700">
+                                    No arguments yet. Start sharing your thoughts!
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        /* Other Modes: Split View by PRO/CON */
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 min-h-[500px]">
+                            {/* PRO Column */}
+                            <div className="bg-slate-900/50 rounded-xl border border-blue-500/20 flex flex-col">
+                                <div className="p-4 border-b border-blue-500/20 bg-blue-500/5 rounded-t-xl">
+                                    <h2 className="text-lg font-bold text-blue-400 text-center">PRO (Support)</h2>
+                                </div>
+                                <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
+                                    {proArguments.map(arg => (
+                                        <ArgumentCard key={arg.id} arg={arg} color="blue" />
+                                    ))}
+                                    {proArguments.length === 0 && (
+                                        <div className="text-center text-slate-500 py-10 italic">
+                                            No arguments in support yet.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* CON Column */}
+                            <div className="bg-slate-900/50 rounded-xl border border-red-500/20 flex flex-col">
+                                <div className="p-4 border-b border-red-500/20 bg-red-500/5 rounded-t-xl">
+                                    <h2 className="text-lg font-bold text-red-400 text-center">CON (Oppose)</h2>
+                                </div>
+                                <div className="flex-1 p-4 space-y-4 overflow-y-auto max-h-[600px]">
+                                    {conArguments.map(arg => (
+                                        <ArgumentCard key={arg.id} arg={arg} color="red" />
+                                    ))}
+                                    {conArguments.length === 0 && (
+                                        <div className="text-center text-slate-500 py-10 italic">
+                                            No arguments in opposition yet.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Error Banner */}
                     {summaryError && (
@@ -389,28 +495,30 @@ export default function DebateRoomPage() {
                     <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 p-4 md:p-6 shadow-2xl z-40">
                         <div className="max-w-4xl mx-auto">
                             <form onSubmit={handleSubmitArgument} className="space-y-4">
-                                <div className="flex gap-4 mb-2 justify-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedSide(Side.PRO)}
-                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.PRO
+                                {!isFriendlyMode && (
+                                    <div className="flex gap-4 mb-2 justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedSide(Side.PRO)}
+                                            className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.PRO
                                                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/50'
                                                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                                            }`}
-                                    >
-                                        Support (PRO)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSelectedSide(Side.CON)}
-                                        className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.CON
+                                                }`}
+                                        >
+                                            Support (PRO)
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedSide(Side.CON)}
+                                            className={`px-6 py-2 rounded-lg font-semibold transition-all ${selectedSide === Side.CON
                                                 ? 'bg-red-600 text-white shadow-lg shadow-red-500/25 ring-2 ring-red-400/50'
                                                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
-                                            }`}
-                                    >
-                                        Oppose (CON)
-                                    </button>
-                                </div>
+                                                }`}
+                                        >
+                                            Oppose (CON)
+                                        </button>
+                                    </div>
+                                )}
                                 <div className="flex gap-2">
                                     <textarea
                                         value={argument}
@@ -439,9 +547,14 @@ export default function DebateRoomPage() {
     );
 }
 
-function ArgumentCard({ arg, color }: { arg: Argument, color: 'blue' | 'red' }) {
-    const borderColor = color === 'blue' ? 'border-blue-500/30' : 'border-red-500/30';
-    const bgColor = color === 'blue' ? 'bg-blue-500/5' : 'bg-red-500/5';
+function ArgumentCard({ arg, color }: { arg: Argument, color: 'blue' | 'red' | 'purple' }) {
+    const colorMap = {
+        blue: { border: 'border-blue-500/30', bg: 'bg-blue-500/5' },
+        red: { border: 'border-red-500/30', bg: 'bg-red-500/5' },
+        purple: { border: 'border-purple-500/30', bg: 'bg-purple-500/5' }
+    };
+    const borderColor = colorMap[color].border;
+    const bgColor = colorMap[color].bg;
 
     return (
         <div className={`p-4 rounded-lg border ${borderColor} ${bgColor} animate-in fade-in slide-in-from-bottom-2`}>
