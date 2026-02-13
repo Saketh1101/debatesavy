@@ -23,6 +23,9 @@ export async function POST(request: NextRequest) {
 
 Your task is to generate a strict, structured critique of the USER'S argument.
 
+CRITICAL: If the user input is gibberish, nonsensical, or not a recognizable debate argument, respond with EXACTLY:
+UNIDENTIFIED: The input is not a recognizable debate argument. Please provide a coherent statement to analyze.
+
 Follow these rules without exception:
 
 * Be concise, analytical, and neutral.
@@ -61,6 +64,9 @@ Suggestion: <one specific, practical improvement in one sentence>`;
 
 Your task is to generate a strict, structured critique of the USER'S argument.
 
+CRITICAL: If the user input is gibberish, nonsensical, or not a recognizable debate argument, respond with EXACTLY:
+UNIDENTIFIED: The input is not a recognizable debate argument. Please provide a coherent statement to analyze.
+
 Follow these rules without exception:
 
 * Be concise, analytical, and neutral.
@@ -98,6 +104,28 @@ Suggestion: <one specific, practical improvement in one sentence>`;
 
             if (debateTopic) {
                 systemPrompt += ` The debate topic is: "${debateTopic}"`;
+            }
+
+            // Validate that the input is a recognizable argument/debate input
+            // Check if input is too short, only nonsense characters, or gibberish
+            const validationCheck = message.trim();
+            if (validationCheck.length < 5) {
+                // Input too short to be a meaningful argument
+                return NextResponse.json({
+                    success: true,
+                    response: 'UNIDENTIFIED: Input is too brief to analyze as a debate argument. Please provide a more complete statement.',
+                    messageId: 'msg_' + Math.random().toString(36).substr(2, 9),
+                });
+            }
+
+            // Check if input contains actual words (not just gibberish/random chars)
+            const wordCount = validationCheck.split(/\s+/).filter((word: string) => word.length > 1 && /[a-zA-Z]/.test(word)).length;
+            if (wordCount < 2) {
+                return NextResponse.json({
+                    success: true,
+                    response: 'UNIDENTIFIED: Input contains insufficient recognizable content to analyze. Please provide a proper debate argument.',
+                    messageId: 'msg_' + Math.random().toString(36).substr(2, 9),
+                });
             }
 
             // Call Ollama HTTP API (local or remote) to generate assistant response
