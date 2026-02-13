@@ -191,7 +191,6 @@ export default function SplitViewDebatePage() {
             return;
         }
 
-        const setFeedback = isUser1 ? setUser1Feedback : setUser2Feedback;
         const setFeedbackLoading = isUser1 ? setUser1Loading : setUser2Loading;
 
         setFeedbackLoading(true);
@@ -199,6 +198,12 @@ export default function SplitViewDebatePage() {
 
         try {
             const userArgumentsText = userArgs.map((arg: any) => arg.content).join('\n\n');
+
+            console.log('[getFeedback] Sending to AI:', {
+                userId,
+                argumentCount: userArgs.length,
+                textLength: userArgumentsText.length
+            });
 
             const res = await fetch('/api/ai-assistant', {
                 method: 'POST',
@@ -216,12 +221,20 @@ export default function SplitViewDebatePage() {
 
             if (!res.ok) {
                 const txt = await res.text();
+                console.error('[getFeedback] API error:', res.status, txt);
                 throw new Error(txt || 'Feedback API error');
             }
 
             const data = await res.json();
-            setFeedback(data.response);
+            console.log('[getFeedback] Response received:', data.response?.substring(0, 50));
+
+            if (isUser1) {
+                setUser1Feedback(data.response);
+            } else {
+                setUser2Feedback(data.response);
+            }
         } catch (err: any) {
+            console.error('[getFeedback] Error:', err);
             setError(err?.message || 'Failed to get feedback');
         } finally {
             setFeedbackLoading(false);
