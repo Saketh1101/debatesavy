@@ -93,6 +93,7 @@ export default function OnlineDebatesPage() {
 
             if (response.ok) {
                 const debate = await response.json();
+                localStorage.setItem(`debate_${debate.id}`, JSON.stringify(debate));
                 window.location.href = `/debate/${debate.id}`;
             } else {
                 alert('Failed to find opponent');

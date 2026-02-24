@@ -32,6 +32,13 @@ export default function DashboardPage() {
 
         const fetchDebates = async () => {
             try {
+                // Load stored user info
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const parsed = JSON.parse(storedUser);
+                    setUser({ name: parsed.name || 'Debater', rating: parsed.rating || 1200 });
+                }
+
                 const response = await fetch('/api/debates', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -41,9 +48,11 @@ export default function DashboardPage() {
                 if (response.ok) {
                     const data = await response.json();
                     setDebates(data);
-                    setUser({ name: 'Debater', rating: 1200 });
-                } else {
+                } else if (response.status === 401) {
                     router.push('/auth/login');
+                } else {
+                    // API error (e.g. DB not configured) — stay on dashboard with empty state
+                    setUser({ name: 'Debater', rating: 1200 });
                 }
             } catch (error) {
                 console.error('Failed to fetch debates:', error);

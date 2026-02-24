@@ -82,7 +82,10 @@ export default function FamousPersonalitiesPage() {
 
             if (response.ok) {
                 const debate = await response.json();
+                localStorage.setItem(`debate_${debate.id}`, JSON.stringify(debate));
                 window.location.href = `/debate/${debate.id}`;
+            } else {
+                alert('Failed to create debate');
             }
         } catch (error) {
             console.error('Error creating debate:', error);

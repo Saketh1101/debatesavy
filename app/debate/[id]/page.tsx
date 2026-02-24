@@ -88,8 +88,13 @@ export default function DebateRoomPage() {
                 const data = await response.json();
                 setDebate(data);
             } else if (!isPolling) {
-                // Only redirect on initial load failure, not polling glitches
-                router.push('/dashboard');
+                // Try loading from localStorage (for mock debates without a DB)
+                const local = localStorage.getItem(`debate_${debateId}`);
+                if (local) {
+                    setDebate(JSON.parse(local));
+                } else {
+                    router.push('/dashboard');
+                }
             }
         } catch (error) {
             console.error('Error loading debate:', error);
@@ -119,13 +124,19 @@ export default function DebateRoomPage() {
 
             if (response.ok) {
                 const newArg = await response.json();
-                setDebate(prev => prev ? {
-                    ...prev,
-                    arguments: [...(prev.arguments || []), newArg]
-                } : null);
+                setDebate(prev => {
+                    if (!prev) return null;
+                    const updated = {
+                        ...prev,
+                        arguments: [...(prev.arguments || []), newArg]
+                    };
+                    // Persist updated debate (with new argument) to localStorage
+                    localStorage.setItem(`debate_${debateId}`, JSON.stringify(updated));
+                    return updated;
+                });
                 setArgument('');
-                // Refresh full state to be sure
-                fetchDebate(token);
+            } else {
+                alert('Failed to send message. Please try again.');
             }
         } catch (error) {
             console.error('Error submitting argument:', error);

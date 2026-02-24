@@ -31,6 +31,7 @@ export default function LoginPage() {
 
             const data = await response.json();
             localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
             router.push('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');

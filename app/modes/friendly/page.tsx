@@ -48,8 +48,13 @@ export default function FriendlyDebatePage() {
 
             if (response.ok) {
                 const debate = await response.json();
+                // Store debate locally so the room works without a DB
+                localStorage.setItem(`debate_${debate.id}`, JSON.stringify(debate));
                 // Redirect to the debate room
                 window.location.href = `/debate/${debate.id}`;
+            } else {
+                const err = await response.json();
+                alert(err.error || 'Failed to create debate');
             }
         } catch (error) {
             console.error('Error creating debate:', error);
